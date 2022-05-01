@@ -4,12 +4,14 @@
 Name:                       Solution
 Describe:                   主逻辑
 queue_flow_line             流水线维护队列（队列）（引用类型）
-stack_solved_flow_line      已解决的流水线维护栈（栈）（引用类型）
+stack_solved_flow_line      已解决的流水线维护栈（栈）（引用类型）(包含生产线是否为核心生产线的信息)
    ***为节省空间，可以通过一个向量及一个下标维护以上两个结构***
 machine_region_window       机器所在区域及窗口维护向量（向量）（引用类型）
 stack_cycle_times                 回环剩余次数（栈）（引用类型）
 is_valid:                   是否有解
-TODO:                       以下逻辑只能处理单一流水线，无法处理多条交叉流水线
+TODO:                       以下逻辑只能处理单一流水线，无法处理多条交叉流水线（完成）
+TODO:                       以下逻辑只能处理类型为0的流水线，无法处理类型为1的流水线（完成）
+                            协同类型的流水线不需要重新进入窗口，优先考虑能否放置在同一窗口，其起始位置为上一个机器窗口的第一个区域。
 */
 BOOL is_valid = Solution(QUEUE &stack_solved_flow_line, STACK &queue_flow_line, VECTOR &machine_region_window, STACK &stack_cycle_times){
     start_region=0;
@@ -20,25 +22,56 @@ BOOL is_valid = Solution(QUEUE &stack_solved_flow_line, STACK &queue_flow_line, 
         //当流水线队列非空，说明问题没有解决
         current_flow_line = queue_flow_line.dequeue();
         //流水线维护队列出队。
-        (region_of_current_machine,window_of_current_machine) = MatchRegion(current_flow_line.current_machine(),start_region,start_window, &cycle_times);
-        // 从起始区域开始匹配合适区域
-        // -1表示无匹配地区，其余为匹配区域编号
-        while(region_of_current_machine < 0){
-            //若未匹配到合适区域，两种情况：
-            if(stack_solved_flow_line().isempty()) return false;
-            //栈空，但仍未匹配到合适的区域，说明整个问题无解，跳出循环，返回错误标识
-            //否则
-            current_flow_line=stack_solved_flow_line.pop();
-            cycle_times = stack_cycle_times.pop();
-            //上一条流水线从已解决栈中出栈，作为当前要考虑的流水线，重新设定流水线的机器。
-            (region_of_current_machine,window_of_current_machine) = GetRegion(machine_region_window,current_flow_line.current_machine());
-            //得到当前流水线的机器及机器已安排的区域
-            queue_flow_line.enqueue(current_flow_line);
-            //将未解决的流水线进队列。
-            (start_region,start_window) = NextRegion(region_of_current_machine,window_of_current_machine,&cycle_times);
-            //得到上一次安排的区域的下一个区域，作为匹配的起始区域
-            (region_of_current_machine,window_of_current_machine) = MatchRegion(current_flow_line.current_machine(),start_region,start_window, &cycle_times);
-            //起始区域开始，重新匹配当前流水线的机器
+        if(current_flow_line.is_core_line()){
+        //当前流水线为核心流水线
+        //这意味着流水线为首尾相连
+            (region_of_current_machine,window_of_current_machine) = MatchRegion(current_flow_line.current_machine(),start_region,start_window, &cycle_times,is_core_line);
+            // 从起始区域开始匹配合适区域
+            // -1表示无匹配地区，其余为匹配区域编号
+            while(region_of_current_machine < 0){
+                //若未匹配到合适区域，两种情况：
+                if(stack_solved_flow_line().isempty()) return false;
+                //栈空，但仍未匹配到合适的区域，说明整个问题无解，跳出循环，返回错误标识
+                //否则
+                current_flow_line=stack_solved_flow_line.pop();
+                cycle_times = stack_cycle_times.pop();
+                //上一条流水线从已解决栈中出栈，作为当前要考虑的流水线，重新设定流水线的机器。
+                queue_flow_line.enqueue(current_flow_line);
+                //将未解决的流水线进队列。
+                (region_of_current_machine,window_of_current_machine) = GetRegion(machine_region_window,current_flow_line.current_machine());
+                //得到当前流水线的机器及机器已安排的区域
+                (start_region,start_window) = NextRegion(region_of_current_machine,window_of_current_machine,&cycle_times);
+                //得到上一次安排的区域的下一个区域，作为匹配的起始区域
+                (region_of_current_machine,window_of_current_machine) = MatchRegion(current_flow_line.current_machine(),start_region,start_window, &cycle_times);
+                //起始区域开始，重新匹配当前流水线的机器
+            }
+        }
+        else{
+            //并非核心生产线，则此时其上一台机器并非上一条生产线的**当前机器**
+            (start_region, start_window) = GetRegion(machine_region_window,current_flow_line.previous_machine());
+            //跳至上一条机器的区域及窗口开始匹配
+            (region_of_current_machine,window_of_current_machine) = MatchRegion(current_flow_line.current_machine(),start_region,start_window, &cycle_times,is_core_line);
+            //开始匹配
+            while(region_of_current_machine < 0){
+                //若未匹配到合适区域，两种情况：
+                target_machine = current_flow_line.previous_machine();
+                while (current_flow_line.current_machine()!=target_machine) {
+                    if(stack_solved_flow_line().isempty()) return false;
+                    //栈空，但仍未匹配到合适的区域，说明整个问题无解，跳出循环，返回错误标识
+                    //与上面不同，这里要出栈及入队列，直至栈顶流水线。
+                    current_flow_line=stack_solved_flow_line.pop();
+                    cycle_times = stack_cycle_times.pop();
+                    //上一条流水线从已解决栈中出栈，作为当前要考虑的流水线，重新设定流水线的机器。
+                    queue_flow_line.enqueue(current_flow_line);
+                    //将未解决的流水线进队列。
+                }
+                (region_of_current_machine,window_of_current_machine) = GetRegion(machine_region_window,current_flow_line.current_machine());
+                //得到当前流水线的机器及机器已安排的区域                
+                (start_region,start_window) = NextRegion(region_of_current_machine,window_of_current_machine,&cycle_times);
+                //得到上一次安排的区域的下一个区域，作为匹配的起始区域
+                (region_of_current_machine,window_of_current_machine) = MatchRegion(current_flow_line.current_machine(),start_region,start_window, &cycle_times);
+                //起始区域开始，重新匹配当前流水线的机器
+            }
         }
         //循环结束，说明当前流水线（机器）已有合适的安置区域
         stack_solved_flow_line.push(current_flow_line);       
@@ -46,6 +79,17 @@ BOOL is_valid = Solution(QUEUE &stack_solved_flow_line, STACK &queue_flow_line, 
         //已解决的流水线维护栈入栈。
         SetRegion(machine_region_window, current_flow_line.current_machine(), region_of_current_machine,window_of_current_machine);
         //设置当前机器的区域。
+        if(queue_flow_line.top().flow_line_type==0){
+            start_window = NextWindow(window_of_current_machine, &cycle_times);
+            //匹配结束的下一个起始匹配点与上面不同
+            //对0类生产线，必须进入下一个窗口
+        }
+        else{
+            start_window = window_of_current_machine;
+            //对1类生产线，优先考虑当前窗口
+        }
+        start_region = window_of_current_machine.factory().regions().first();
+        //以起始窗口的第一个区域作为起始区域。
     }
     return true;
     //问题解决，正常退出
@@ -53,17 +97,18 @@ BOOL is_valid = Solution(QUEUE &stack_solved_flow_line, STACK &queue_flow_line, 
 
 /*
 Name:                       MatchRegion
-Describe:                   匹配当前机器的区域
+Describe:                   匹配当前机器的区域（**只有核心生产线需要匹配预处理**）
 current_machine:            当前需匹配的机器
 start_region:               匹配开始的区域
 start_window:               匹配开始的窗口
 cycle_times:                能使用的回环次数（引用变量）
+is_core_line:               是否为核心生产线
 region_of_current_machine:  当前机器所匹配的区域（-1表示未匹配到）
 window_of_current_machine:  当前机器所匹配的区域的窗口
 TODO:               
 */
 
-(INT region_of_current_machine, INT window_of_current_machine)=MatchRegion(INT current_machine, INT start_region,INT start_window, INT &cycle_times){
+(INT region_of_current_machine, INT window_of_current_machine)=MatchRegion(INT current_machine, INT start_region,INT start_window, INT &cycle_times, BOOL is_core_line){
     current_region = start_region;
     //当前待匹配的区域为起始区域
     current_window = start_window;  
@@ -72,7 +117,7 @@ TODO:
     //仍有待匹配区域
         is_match = MatchEnergy(current_machine,current_region);
         //当前区域能量类型是否匹配
-        if(is_match){
+        if(is_match&&is_core_line){
             //若匹配
             is_match = MatchInit(current_machine,current_window);
             //当前区域所在窗口的预处理方式是否匹配
