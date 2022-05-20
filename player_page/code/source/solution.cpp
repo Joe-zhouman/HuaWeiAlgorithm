@@ -34,9 +34,14 @@ namespace MiuiIsTheBest {
             cycled_windows.push_back(index_current_window);
             current_window->rest_cycle_times--;
             index_current_window = current_window->cnext;
+            !current_window->first_order_next;
             return;
         }
-        index_current_window++;
+        if (index_current_window < num_windows - 1) {
+            index_current_window++;
+        } else {
+            index_current_window = current_window->cnext;
+        }
     }
 
     //TODO:有点问题。。。
@@ -79,6 +84,10 @@ namespace MiuiIsTheBest {
         MatchRegion(flow_lines[0].previous_machine, current_region, current_window, flow_lines[0].is_core_line,
                     cycled_windows);
         SetRegion(0, current_region, current_window);
+        if (!flow_lines[0].type) {
+            NextWindow(current_window, cycled_windows);
+        }
+        current_region = GetFactory(current_window).front();
 #ifdef DEBUG
         std::cout << "reset region for flow_line " << index_current_flow_line - 1 << '\n';
 #endif
@@ -125,7 +134,6 @@ namespace MiuiIsTheBest {
     void solution::RegainCycleTimes(std::vector<short> &cycled_windows) {
         for (short cycled_window: cycled_windows) {
             windows[cycled_window].rest_cycle_times++;
-            !windows[cycled_window].first_order_next;
         }
     }
 
@@ -201,7 +209,7 @@ namespace MiuiIsTheBest {
                 }
             }
         }
-        windows[num_windows].first_order_next = true;
+        windows[num_windows - 1].first_order_next = true;
         std::cin >> num_machine;
         short machine_type1;
         int machine_energy_cost[5];
