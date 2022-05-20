@@ -1,7 +1,7 @@
 //
 // Created by joe on 22-5-2.
 //
-#define DEBUG 0
+//#define DEBUG 1
 
 #include "../include/solution.h"
 #include "iostream"
