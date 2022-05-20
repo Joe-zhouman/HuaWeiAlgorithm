@@ -1,7 +1,7 @@
 //
 // Created by joe on 22-5-2.
 //
-
+#pragma once
 #ifndef HUAWEIALGORITHM_FLOW_LINE_H
 #define HUAWEIALGORITHM_FLOW_LINE_H
 
