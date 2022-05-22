@@ -10,7 +10,7 @@ int main(int argc, char *argv[]) {
         case_solution.OutPut();
         return 0;
     } else {
-        cout << "no solution for this case";
+        cout << "no solution2 for this case";
         return 1;
     }
 }

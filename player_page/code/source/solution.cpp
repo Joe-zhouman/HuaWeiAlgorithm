@@ -1,168 +1,91 @@
 //
-// Created by joe on 22-5-2.
+// Created by joe on 22-5-21.
 //
-//#define DEBUG 1
-
-#include "../include/solution.h"
 #include "iostream"
+#include "solution.h"
 
 namespace MiuiIsTheBest {
-    void solution::GetRegion(short current_machine, short &index_current_region, short &index_current_window) {
-        index_current_region = machine_regions[current_machine];
-        index_current_window = machine_windows[current_machine];
-    }
-
-    void solution::SetRegion(short current_machine, short &index_current_region, short &index_current_window) {
-        machine_regions[current_machine] = index_current_region;
-        machine_windows[current_machine] = index_current_window;
-    }
-
-    bool solution::MatchInit(short index_machine, short index_window) {
-        return windows[index_window].init_type[machine_types[index_machine].to_int()];
-    }
-
-    bool solution::MatchEnergy(short index_machine, short index_region) {
-        return region_energy_types[index_region] == machine_first_energy_type[index_machine] ||
-               region_energy_types[index_region] == machine_second_energy_type[index_machine];
-    }
-
-    //TODO:有点问题
-    void solution::NextWindow(short &index_current_window, std::vector<short> &cycled_windows) {
-        window *current_window = &windows[index_current_window];
-        if (current_window->rest_cycle_times != 0 && current_window->first_order_next == 1 &&
-            current_window->cnext != -1) {
-            cycled_windows.push_back(index_current_window);
-            current_window->rest_cycle_times--;
-            index_current_window = current_window->cnext;
-            !current_window->first_order_next;
-            return;
-        }
-        if (index_current_window < num_windows - 1) {
-            index_current_window++;
-        } else {
-            index_current_window = current_window->cnext;
-        }
-    }
-
-    //TODO:有点问题。。。
-    void
-    solution::NextRegion(short &index_current_region, short &index_current_window, std::vector<short> &cycled_windows) {
-        if (GetFactory(index_current_window).back() > index_current_region) {
-            index_current_region++;
-            return;
-        }
-        NextWindow(index_current_window, cycled_windows);
-        if (index_current_window >= num_windows) {
-            index_current_region = -1;
-            return;
-        }
-        index_current_region = GetFactory(index_current_window).front();
-    }
-
-    //TODO:有点问题。。。
-    void solution::MatchRegion(short current_machine, short &start_region, short &start_window, bool is_core_line,
-                               std::vector<short> &cycled_windows) {
-        while (start_region != -1) {
-#ifdef DEBUG
-            std::cout << "match machine " << current_machine << " with region " << start_region << '\n';
-#endif
-
-            bool is_match = MatchEnergy(current_machine, start_region);
-            if (is_match && is_core_line) {
-                is_match = MatchInit(current_machine, start_window);
-            }
-            if (is_match) return;
-            NextRegion(start_region, start_window, cycled_windows);
-        }
-        start_region = -1;
-    }
-
-    bool solution::GetSolution() {
-        short current_region = 0;
-        short current_window = 0;
-        std::vector<short> cycled_windows;
-        MatchRegion(flow_lines[0].previous_machine, current_region, current_window, flow_lines[0].is_core_line,
-                    cycled_windows);
-        SetRegion(0, current_region, current_window);
-        if (!flow_lines[0].type) {
-            NextWindow(current_window, cycled_windows);
-        }
-        current_region = GetFactory(current_window).front();
-#ifdef DEBUG
-        std::cout << "reset region for flow_line " << index_current_flow_line - 1 << '\n';
-#endif
-        op_cycled_windows.push(cycled_windows);
-        cycled_windows.clear();
-        while (index_current_flow_line < num_flow_line) {
-            MatchRegion(flow_lines[index_current_flow_line].current_machine, current_region, current_window,
-                        flow_lines[index_current_flow_line].is_core_line, cycled_windows);
-            while (current_region < 0) {
-#ifdef DEBUG
-                std::cout << "reset region for flow_line " << index_current_flow_line - 1 << '\n';
-#endif
-                short target_machine = flow_lines[index_current_flow_line].previous_machine;
-                while (flow_lines[index_current_flow_line].current_machine != target_machine) {
-                    if (index_current_flow_line == 0) return false;
-                    index_current_flow_line--;
-                    cycled_windows = op_cycled_windows.top();
-                    op_cycled_windows.pop();
-                    RegainCycleTimes(cycled_windows);
-                }
-                cycled_windows.clear();
-                GetRegion(flow_lines[index_current_flow_line].current_machine, current_region, current_window);
-                NextRegion(current_region, current_window, cycled_windows);
-                MatchRegion(flow_lines[index_current_flow_line].current_machine, current_region, current_window,
-                            flow_lines[index_current_flow_line].is_core_line, cycled_windows);
-            }
-
-            op_cycled_windows.push(cycled_windows);
-            SetRegion(flow_lines[index_current_flow_line].current_machine, current_region, current_window);
-#ifdef DEBUG
-            std::cout << "set region for flow_line " << index_current_flow_line << '\n';
-#endif
-            index_current_flow_line++;
-            cycled_windows.clear();
-            GetRegion(flow_lines[index_current_flow_line].previous_machine, current_region, current_window);
-            if (!flow_lines[index_current_flow_line].type) {
-                NextWindow(current_window, cycled_windows);
-            }
-            current_region = GetFactory(current_window).front();
-        }
-        return true;
-    }
-
     void solution::RegainCycleTimes(std::vector<short> &cycled_windows) {
         for (short cycled_window: cycled_windows) {
             windows[cycled_window].rest_cycle_times++;
         }
     }
 
-    inline std::vector<short> &solution::GetFactory(short current_window) {
-        return factories[windows[current_window].factory];
+    bool solution::IsSuccessor(short first_window, short second_window, std::vector<short> cycled_windows) {
+        if (second_window > first_window)return true;
+        if (second_window < first_window && first_window < num_cycle_windows &&
+            windows[num_cycle_windows - 1].rest_cycle_times > 0) {
+            windows[num_cycle_windows - 1].rest_cycle_times--;
+            cycled_windows.emplace_back(num_cycle_windows - 1);
+            return true;
+        }
+        if (second_window == first_window && windows[first_window].rest_cycle_times > 0) {
+            windows[first_window].rest_cycle_times--;
+            cycled_windows.emplace_back(num_cycle_windows - 1);
+            return true;
+        }
+        return false;
     }
 
+    machine *solution::GetCurrentMachine(short index_flow_line) {
+        return &machines[flow_lines[index_flow_line].current_machine];
+    }
+
+    machine *solution::GetPreviousMachine(short index_flow_line) {
+        return &machines[flow_lines[index_flow_line].previous_machine];
+    }
+
+    short solution::GetCurrentWindow(short index_flow_line) {
+        machine *current_machine = GetCurrentMachine(index_flow_line);
+        return current_machine->allowed_windows[current_machine->current_position];
+    }
+
+    short solution::GetPreviousWindow(short index_flow_line) {
+        machine *current_machine = GetPreviousMachine(index_flow_line);
+        return current_machine->allowed_windows[current_machine->current_position];
+    }
+
+    bool solution::GetSolution() {
+        machines[0].current_position = 0;
+        std::vector<short> cycled_windows;
+        while (index_current_flow_line < num_flow_line && index_current_flow_line >= 0) {
+            machine *current_machine = GetCurrentMachine(index_current_flow_line);
+            short index_current_windows = GetCurrentWindow(index_current_flow_line);
+            short index_previous_windows = GetPreviousWindow(index_current_flow_line);
+            while (current_machine->HasNext()
+                   || (!flow_lines[index_current_flow_line].type &&
+                       !IsSuccessor(index_current_windows, index_previous_windows, cycled_windows))
+                   || (flow_lines[index_current_flow_line].type && index_current_windows == index_previous_windows)) {
+                current_machine->current_position++;
+                op_cycled_windows.push(cycled_windows);
+                cycled_windows.clear();
+            }
+            if (current_machine->HasNext()) {
+                index_current_flow_line++;
+                continue;
+            }
+            while (index_current_flow_line > current_machine->first_flow_line) {
+                if (op_cycled_windows.empty()) return false;
+                cycled_windows = op_cycled_windows.top();
+                RegainCycleTimes(cycled_windows);
+                cycled_windows.clear();
+                index_current_flow_line--;
+            }
+            current_machine = GetCurrentMachine(index_current_flow_line);
+            current_machine->current_position++;
+        }
+        return index_current_flow_line >= 0;
+    }
     solution::solution() {
-        num_flow_line = 0;
-        num_core_flow_line = 0;
-        num_windows = 0;
-        num_machine = 0;
-        num_regions = 0;
-        num_factories = 0;
-        index_current_flow_line = 0;
+
         std::cin.ignore(100, '\n');
         std::cin.ignore(100, '\n');
         std::cin >> num_factories;
-#ifdef DEBUG
-        std::cout << num_factories << '\n';
-#endif
         for (int i = 0; i < num_factories; ++i) {
             std::vector<short> temp_factory;
             factories.push_back(temp_factory);
         }
         std::cin >> num_regions;
-#ifdef DEBUG
-        std::cout << num_regions << '\n';
-#endif
         short factory, energy;
         for (short i = 0; i < num_regions; ++i) {
             std::cin >> factory >> energy;
@@ -172,12 +95,8 @@ namespace MiuiIsTheBest {
         short max_cycle_times;
         std::cin >> max_cycle_times;
         max_cycle_times++;
-        short num_cycle_windows;
         std::cin >> num_cycle_windows;
         std::cin >> num_windows;
-#ifdef DEBUG
-        std::cout << num_windows << '\n';
-#endif
         bool self_cycle;
         short factory_index;
         short window_cost[num_windows];
@@ -216,58 +135,113 @@ namespace MiuiIsTheBest {
         short first_energy;
         short second_energy;
         for (short i = 0; i < num_machine; ++i) {
-            machine_regions.emplace_back(-1);
-            machine_windows.emplace_back(-1);
             std::cin >> machine_type1 >> machine_energy_cost[0] >> machine_energy_cost[1] >> machine_energy_cost[2]
                      >> machine_energy_cost[3] >> machine_energy_cost[4];
-            machine_types.emplace_back(machine_type(machine_type1));
-            short j = 0;
-            for (first_energy = -1; first_energy == -1; ++j) {
-                if (machine_energy_cost[j] != 0) {
-                    first_energy = j;
-                }
-            }
-            for (; j < 5; ++j) {
-                if (machine_energy_cost[j] != 0) {
-                    second_energy = j;
-                }
-            }
-            if (first_energy <= second_energy) {
-                machine_first_energy_type.emplace_back(energy_type(first_energy));
-                machine_second_energy_type.emplace_back(energy_type(second_energy));
+            if (machine_type1 == 0) {
+                GetEnergyOrder(machine_energy_cost, first_energy, second_energy, 0, 1);
+            } else if (machine_type1 == 1) {
+                GetEnergyOrder(machine_energy_cost, first_energy, second_energy, 0, 2);
             } else {
-                machine_first_energy_type.emplace_back(energy_type(second_energy));
-                machine_second_energy_type.emplace_back(energy_type(first_energy));
+                GetEnergyOrder(machine_energy_cost, first_energy, second_energy, 3, 4);
             }
+            machines.emplace_back(machine(machine_type1, first_energy, second_energy));
         }
         std::cin >> num_flow_line;
+
         for (short i = 0; i < num_flow_line; ++i) {
             flow_line temp_flow_line;
             std::cin >> temp_flow_line.type >> temp_flow_line.previous_machine >> temp_flow_line.current_machine;
-            temp_flow_line.is_core_line = false;
             flow_lines.push_back(temp_flow_line);
+            if (machines[flow_lines[i].current_machine].first_flow_line == -1) {
+                machines[flow_lines[i].current_machine].first_flow_line = i;
+            }
         }
         std::cin >> num_core_flow_line;
         short index_core_flow_line;
-        for (int i = 0; i < num_core_flow_line; ++i) {
+        std::cin >> index_core_flow_line;
+        flow_lines[index_core_flow_line].is_core = true;
+        machines[flow_lines[index_core_flow_line].current_machine].is_core = true;
+        machines[flow_lines[index_core_flow_line].previous_machine].is_core = true;
+
+        for (short i = 1; i < num_core_flow_line; ++i) {
             std::cin >> index_core_flow_line;
-            flow_lines[index_core_flow_line].is_core_line = true;
+            flow_lines[index_core_flow_line].is_core = true;
+            machines[flow_lines[index_core_flow_line].current_machine].is_core = true;
+        }
+        MachineInit();
+    }
+
+    void solution::GetEnergyOrder(const int *machine_energy_cost, short &first_energy, short &second_energy, short i,
+                                  short j) {
+        if (machine_energy_cost[i] <= machine_energy_cost[j]) {
+            first_energy = i;
+            second_energy = j;
+        } else {
+            first_energy = j;
+            second_energy = i;
+        }
+    }
+
+    void solution::MachineInit() {
+        for (machine current_machine: machines) {
+            for (short index_window = 0; index_window < num_windows; index_window++) {
+                window *current_window = &windows[index_window];
+                if (!current_machine.is_core ||
+                    (current_machine.is_core && current_window->init_type[current_machine.type.to_int()])) {
+                    for (short index_region = factories[current_window->factory].front();
+                         index_region <= factories[current_window->factory].back(); index_region++) {
+                        if (region_energy_types[index_region] == current_machine.first_energy_type) {
+                            current_machine.allowed_windows.emplace_back(index_window);
+                            current_machine.allowed_regions.emplace_back(index_region);
+                        }
+                    }
+                }
+            }
+            for (short index_window = 0; index_window < num_windows; index_window++) {
+                window *current_window = &windows[index_window];
+                if (!current_machine.is_core ||
+                    (current_machine.is_core && current_window->init_type[current_machine.type.to_int()])) {
+                    for (short index_region = factories[current_window->factory].front();
+                         index_region <= factories[current_window->factory].back(); index_region++) {
+                        if (region_energy_types[index_region] == current_machine.second_energy_type) {
+                            current_machine.allowed_windows.emplace_back(index_window);
+                            current_machine.allowed_regions.emplace_back(index_region);
+                        }
+                    }
+                }
+            }
         }
     }
 
     void solution::OutPut() {
         std::cout << num_machine << '\n';
-        for (short i = 0; i < num_machine; ++i) {
-            std::cout << machine_regions[i] << ' ';
+        for (machine current_machine: machines) {
+            std::cout << current_machine.allowed_regions[current_machine.current_position] << ' ';
         }
         std::cout << '\n';
         std::cout << num_core_flow_line + 1 << '\n';
-        std::cout << machine_windows[0] << ' ';
-        for (short i = 0; i < num_flow_line; ++i) {
-            if (flow_lines[i].is_core_line) {
-                std::cout << machine_windows[flow_lines[i].current_machine] << ' ';
+        short i = 0;
+        for (; i < num_flow_line; ++i) {
+            if (flow_lines[i].is_core) {
+                machine *previous_machine = GetPreviousMachine(i);
+                machine *current_machine = GetCurrentMachine(i);
+                std::cout << previous_machine->allowed_windows[previous_machine->current_position] << ' '
+                          << current_machine->allowed_windows[current_machine->current_position] << ' ';
+                break;
+            }
+        }
+        for (++i; i < num_flow_line; ++i) {
+            if (flow_lines[i].is_core) {
+                machine *current_machine = GetCurrentMachine(i);
+                std::cout << current_machine->allowed_windows[current_machine->current_position] << ' ';
             }
         }
         std::cout << '\n';
+#ifdef DEBUG
+        for (short i = 0; i < num_machine; ++i) {
+            std::cout << machine_windows[i] << ' ';
+        }
+        std::cout << '\n';
+#endif
     }
 } // MiuiIsTheBest

@@ -8,10 +8,10 @@
 namespace MiuiIsTheBest {
 
     struct flow_line {
-        bool type;
+        bool type;//0,1
         short previous_machine;
         short current_machine;
-        bool is_core_line;
+        bool is_core;
     };
 
 } // MiuiIsTheBest

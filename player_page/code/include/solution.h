@@ -1,65 +1,52 @@
 //
-// Created by joe on 22-5-2.
+// Created by joe on 22-5-21.
 //
 #pragma once
-#ifndef HUAWEIALGORITHM_SOLUTION_H
-#define HUAWEIALGORITHM_SOLUTION_H
 
-#include "flow_line.h"
-#include "energy_type.h"
+#include "machine.h"
 #include "window.h"
-#include "machine_type.h"
-#include <vector>
+#include "flow_line.h"
 #include <stack>
 
-namespace MiuiIsTheBest {
+#ifndef EMBEDDED_2022_SOLUTION_H
+#define EMBEDDED_2022_SOLUTION_H
 
+namespace MiuiIsTheBest {
     class solution {
-    private:
-        //静态变量组
         std::vector<window> windows;//所有窗口的集合
         std::vector<std::vector<short>> factories;//所有工厂的集合
         std::vector<flow_line> flow_lines;//所有生产线的集合
         std::vector<energy_type> region_energy_types;//所有区域对应的能源类型
-        std::vector<machine_type> machine_types;//所有机器的类型
-        std::vector<energy_type> machine_first_energy_type;//机器的第一顺位能源
-        std::vector<energy_type> machine_second_energy_type;//机器的第二顺位能源
+        std::vector<machine> machines;//所有机器的集合
 
-        short num_flow_line;//流水线核心产线边数
-        short num_core_flow_line;
+        short num_flow_line = 0;
+        short num_core_flow_line = 0;//流水线核心产线边数
         //其他变量
-        short index_current_flow_line;
-        short num_factories;
-        short num_windows;
-        short num_regions;
+        short index_current_flow_line = 0;
+        short num_machine = 0;
+        short num_factories = 0;
+        short num_windows = 0;
+        short num_regions = 0;
+        short num_cycle_windows = 0;
         std::stack<std::vector<short>> op_cycled_windows;//每次操作使用回环的窗口记录栈
-        std::vector<short> machine_regions;//每个机器匹配到的区域
-        std::vector<short> machine_windows;//每个机器匹配到的窗口
-        //私有方法
-        bool MatchEnergy(short index_machine, short index_region);
+        void MachineInit();
 
-        bool MatchInit(short index_machine, short index_window);
+        bool IsSuccessor(short first_window, short second_window, std::vector<short> cycled_windows);
 
-        void NextWindow(short &index_current_window, std::vector<short> &cycled_windows);
-
-        void NextRegion(short &index_current_region, short &index_current_window, std::vector<short> &cycled_windows);
-
-        void MatchRegion(short current_machine, short &start_region, short &start_window, bool is_core_line,
-                         std::vector<short> &cycled_windows);
+        static void
+        GetEnergyOrder(const int *machine_energy_cost, short &first_energy, short &second_energy, short i, short j);
 
         void RegainCycleTimes(std::vector<short> &cycled_windows);
 
-        inline void GetRegion(short current_machine, short &index_current_region, short &index_current_window);
+        machine *GetCurrentMachine(short index_flow_line);
 
-        inline void SetRegion(short current_machine, short &index_current_region, short &index_current_window);
+        machine *GetPreviousMachine(short index_flow_line);
 
-        inline std::vector<short> &GetFactory(short current_window);
+        short GetCurrentWindow(short index_flow_line);
+
+        short GetPreviousWindow(short index_flow_line);
 
     public:
-        //结果变量
-        //TODO
-        short num_machine;
-
         bool GetSolution();
 
         void OutPut();
@@ -69,4 +56,4 @@ namespace MiuiIsTheBest {
 
 } // MiuiIsTheBest
 
-#endif //HUAWEIALGORITHM_SOLUTION_H
+#endif //EMBEDDED_2022_SOLUTION_H
