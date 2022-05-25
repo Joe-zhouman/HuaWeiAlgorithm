@@ -12,9 +12,13 @@ namespace MiuiIsTheBest {
 
     class machine {
     public:
-        short current_position = -1;
+        short current_position = 0;
         std::vector<short> allowed_windows;
         std::vector<short> allowed_regions;
+        std::vector<machine *> parents;
+        std::vector<machine *> priorities;
+        std::vector<bool> priority_edge_types;
+        bool visited = false;
         machine_type type;
         energy_type first_energy_type;
         energy_type second_energy_type;
@@ -26,6 +30,8 @@ namespace MiuiIsTheBest {
         short CurrentRegion() { return allowed_regions[current_position]; }
 
         bool HasNext() { return current_position < allowed_windows.size() - 1; }
+
+        bool OutOfPosition() { return current_position >= allowed_windows.size(); }
 
         machine(short machine_type_number, short first_energy_type_number, short second_energy_type_number)
                 : type(machine_type(machine_type_number)),

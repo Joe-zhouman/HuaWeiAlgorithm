@@ -31,12 +31,12 @@ namespace MiuiIsTheBest {
         std::stack<std::vector<short>> op_cycled_windows;//每次操作使用回环的窗口记录栈
         void MachineInit();
 
-        bool IsSuccessor(short first_window, short second_window, std::vector<short> cycled_windows);
+        bool IsSuccessor(short current_window, short previous_window, bool flow_line_type);
 
         static void
         GetEnergyOrder(const int *machine_energy_cost, short &first_energy, short &second_energy, short i, short j);
 
-        void RegainCycleTimes(std::vector<short> &cycled_windows);
+        void RegainCycleTimes(const std::vector<short> *cycled_windows);
 
         machine *GetCurrentMachine(short index_flow_line);
 

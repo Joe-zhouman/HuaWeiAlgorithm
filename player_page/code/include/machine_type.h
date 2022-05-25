@@ -15,7 +15,7 @@ namespace MiuiIsTheBest {
         }
 
         int to_int() {
-            return static_cast<int>(first_bit) + (static_cast<int>(second_bit) << 1);
+            return first_bit * 1 + second_bit * 2;
         }
 
         explicit machine_type(short n) {
