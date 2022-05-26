@@ -7,7 +7,7 @@
 
 namespace MiuiIsTheBest {
 
-    struct flow_line {
+    struct FlowLine {
         bool type;//0,1
         short previous_machine;
         short current_machine;

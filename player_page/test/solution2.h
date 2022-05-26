@@ -5,10 +5,9 @@
 #ifndef HUAWEIALGORITHM_SOLUTION_H
 #define HUAWEIALGORITHM_SOLUTION_H
 
-#include "flow_line.h"
-#include "energy_type.h"
-#include "window.h"
-#include "machine_type.h"
+#include "FlowLine.h"
+#include "Window.h"
+#include "BoolType.h"
 #include <vector>
 #include <stack>
 
