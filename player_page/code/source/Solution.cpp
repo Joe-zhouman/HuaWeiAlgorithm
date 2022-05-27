@@ -39,16 +39,18 @@ namespace MiuiIsTheBest {
     }
     bool Solution::GetSolution() {
         for (Start &start: starts) {
-            if (!TSort(start.index, &machine_index)) {
+            short clock = 0;
+            if (!TSort(start.index, &machine_index, clock)) {
                 return false;
             }
             start.depth = machine_index.size();
             machine_index.clear();
             Reset();
         }
+        short clock = 0;
         std::sort(starts.begin(), starts.end());
         for (Start start: starts) {
-            if (!TSort(start.index, &machine_index)) {
+            if (!TSort(start.index, &machine_index, clock)) {
                 return false;
             }
         }
@@ -104,23 +106,19 @@ namespace MiuiIsTheBest {
 //                    std::cout << "Machine " << machine_index[index_current_step] << " is out of position" << std::endl;
 //#endif
 //                    short back_tracking_position = 0;
+                    short back_tracking_step = 0;
                     std::vector<short> *back_tracking_machines = current_machine->parents;
-                    short num_matched_wrong_parents = 0;
-                    while (num_matched_wrong_parents < back_tracking_machines->size()) {
+                    for (short &index: *back_tracking_machines) {
+                        short position =
+                                std::find(machine_index.begin(), machine_index.end(), index) - machine_index.begin();
+                        if (position > back_tracking_step) back_tracking_step = position;
+                    }
+                    while (index_current_step < back_tracking_step) {
                         current_machine->RegainCycleTimes(windows);
                         current_machine->current_position = 0;
                         index_current_step++;
                         index_current_machine = machine_index[index_current_step];
                         current_machine = &machines[index_current_machine];
-//#ifdef DEBUG
-//                        std::cout << "Reset machine " << machine_index[index_current_step] << std::endl;
-//#endif
-                        for (short index: *back_tracking_machines) {
-                            if (index_current_machine == index) {
-                                num_matched_wrong_parents++;
-//                                back_tracking_position = current_machine->current_position;
-                            }
-                        }
                     }
                     current_machine->current_position++;
                     current_machine->RegainCycleTimes(windows);
@@ -194,25 +192,24 @@ namespace MiuiIsTheBest {
         MachinePositionInit();
     }
 
-    bool Solution::TSort(short index_machine, std::vector<short> *S) {
+    bool Solution::TSort(short index_machine, std::vector<short> *S, short &clock) {
         Machine *current_machine = &machines[index_machine];
+        current_machine->depth = ++clock;
         current_machine->status = V_STATUS::DISCOVERED;
         if (current_machine->children != nullptr) {
-
-
             for (short u = 0; u < current_machine->children->size(); u++) {
                 short index_current_child = current_machine->children->at(u).index;
                 Machine *current_child = &machines[index_current_child];
                 switch (current_child->status) {
                     case V_STATUS::UNDISCOVERED:
-                        if (!TSort(index_current_child, S)) return false;
+                        if (!TSort(index_current_child, S, clock)) return false;
                         break;
                     case V_STATUS::DISCOVERED:
                         return false;
                     default:
                         break;
                 }
-        }
+            }
         }
         current_machine->status = V_STATUS::VISITED;
         S->emplace_back(index_machine);
@@ -237,7 +234,8 @@ namespace MiuiIsTheBest {
             if (machine.children == nullptr)continue;
             if (machine.children->size() > 1) {
                 for (Start &start: *machine.children) {
-                    if (!TSort(start.index, &machine_index)) {
+                    short clock = 0;
+                    if (!TSort(start.index, &machine_index, clock)) {
                         return false;
                     }
                     start.depth = machine_index.size();
@@ -315,10 +313,10 @@ namespace MiuiIsTheBest {
         }
         std::cout << '\n';
 //#ifdef FULL_OUTPUT
-//        for (Machine &current_machine: machines) {
-//            std::cout << current_machine.CurrentWindow() << ' ';
-//        }
-//        std::cout << '\n';
+        for (Machine &current_machine: machines) {
+            std::cout << current_machine.CurrentWindow() << ' ';
+        }
+        std::cout << '\n';
 //#endif
     }
 } // MiuiIsTheBest

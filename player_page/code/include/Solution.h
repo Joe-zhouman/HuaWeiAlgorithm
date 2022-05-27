@@ -40,7 +40,7 @@ namespace MiuiIsTheBest {
 
         Machine *GetPreviousMachine(short index_flow_line);
 
-        bool TSort(short index_machine, std::vector<short> *S);
+        bool TSort(short index_machine, std::vector<short> *S, short &clock);
 
         void Reset() {
             for (Machine &machine: machines) {
