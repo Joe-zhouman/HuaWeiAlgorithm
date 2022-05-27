@@ -5,16 +5,15 @@
 #ifndef HUAWEIALGORITHM_SOLUTION_H
 #define HUAWEIALGORITHM_SOLUTION_H
 
-#include "flow_line.h"
-#include "energy_type.h"
-#include "window.h"
-#include "machine_type.h"
+#include "FlowLine.h"
+#include "Window.h"
+#include "BoolType.h"
 #include <vector>
 #include <stack>
 
 namespace MiuiIsTheBest {
 
-    class solution {
+    class solution2 {
     private:
         //静态变量组
         std::vector<window> windows;//所有窗口的集合
@@ -32,9 +31,14 @@ namespace MiuiIsTheBest {
         short num_factories;
         short num_windows;
         short num_regions;
+        short num_cycle_windows;
         std::stack<std::vector<short>> op_cycled_windows;//每次操作使用回环的窗口记录栈
         std::vector<short> machine_regions;//每个机器匹配到的区域
         std::vector<short> machine_windows;//每个机器匹配到的窗口
+        std::vector<short> machine_first_flow_line;//每个机器第一次出现的流水线
+        std::vector<short> first_match_regions;
+        std::vector<short> first_match_windows;
+
         //私有方法
         bool MatchEnergy(short index_machine, short index_region);
 
@@ -51,9 +55,11 @@ namespace MiuiIsTheBest {
 
         inline void GetRegion(short current_machine, short &index_current_region, short &index_current_window);
 
-        inline void SetRegion(short current_machine, short &index_current_region, short &index_current_window);
+        inline void SetRegion(short current_machine, short index_current_region, short index_current_window);
 
         inline std::vector<short> &GetFactory(short current_window);
+
+        bool IsSuccessor(short first_window, short second_window, std::vector<short> cycled_windows);
 
     public:
         //结果变量
@@ -64,7 +70,7 @@ namespace MiuiIsTheBest {
 
         void OutPut();
 
-        solution();
+        solution2();
     };
 
 } // MiuiIsTheBest

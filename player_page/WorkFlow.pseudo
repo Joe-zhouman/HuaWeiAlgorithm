@@ -185,14 +185,14 @@ INT next_window = NextWindow(INT current_window, INT &cycle_times){
 Name:           MatchEnergy
 Describe:       匹配机器与区域
 */
-BOOL is_match = MatchEnergy(machine,regions){
+BOOL is_match = MatchEnergy(Machine,regions){
 
 }
 /*
 Name:           MatchInit
 Describe:       匹配机器与窗口
 */
-BOOL is_match = MatchInit(machine,window){
+BOOL is_match = MatchInit(Machine,Window){
     
 }
 VOID ReadData(string filename){
