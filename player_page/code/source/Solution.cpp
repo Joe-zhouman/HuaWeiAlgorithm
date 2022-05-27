@@ -38,7 +38,6 @@ namespace MiuiIsTheBest {
         return &machines[flow_lines[index_flow_line].previous_machine];
     }
     bool Solution::GetSolution() {
-        std::vector<short> machine_index;
         for (Start &start: starts) {
             if (!TSort(start.index, &machine_index)) {
                 return false;
@@ -193,31 +192,34 @@ namespace MiuiIsTheBest {
             machines[flow_lines[index_core_flow_line].current_machine].is_core = true;
         }
         MachinePositionInit();
-        MachineGraphInit();
     }
 
     bool Solution::TSort(short index_machine, std::vector<short> *S) {
         Machine *current_machine = &machines[index_machine];
         current_machine->status = V_STATUS::DISCOVERED;
-        for (short u = 0; current_machine->children != nullptr && u < current_machine->children->size(); u++) {
-            short index_current_child = current_machine->children->at(u);
-            Machine *current_child = &machines[index_current_child];
-            switch (current_child->status) {
-                case V_STATUS::UNDISCOVERED:
-                    if (!TSort(index_current_child, S)) return false;
-                    break;
-                case V_STATUS::DISCOVERED:
-                    return false;
-                default:
-                    break;
-            }
+        if (current_machine->children != nullptr) {
+
+
+            for (short u = 0; u < current_machine->children->size(); u++) {
+                short index_current_child = current_machine->children->at(u).index;
+                Machine *current_child = &machines[index_current_child];
+                switch (current_child->status) {
+                    case V_STATUS::UNDISCOVERED:
+                        if (!TSort(index_current_child, S)) return false;
+                        break;
+                    case V_STATUS::DISCOVERED:
+                        return false;
+                    default:
+                        break;
+                }
+        }
         }
         current_machine->status = V_STATUS::VISITED;
         S->emplace_back(index_machine);
         return true;
     }
 
-    void Solution::MachineGraphInit() {
+    bool Solution::MachineGraphInit() {
         for (FlowLine current_flow_line: flow_lines) {
             machines[current_flow_line.previous_machine].children->emplace_back(current_flow_line.current_machine);
             machines[current_flow_line.current_machine].connect_types->emplace_back(current_flow_line.type);
@@ -231,6 +233,21 @@ namespace MiuiIsTheBest {
             }
             if (machines[i].children->size() == 0)machines[i].children = nullptr;
         }
+        for (Machine &machine: machines) {
+            if (machine.children == nullptr)continue;
+            if (machine.children->size() > 1) {
+                for (Start &start: *machine.children) {
+                    if (!TSort(start.index, &machine_index)) {
+                        return false;
+                    }
+                    start.depth = machine_index.size();
+                    std::sort(machine.children->begin(), machine.children->end());
+                    machine_index.clear();
+                    Reset();
+                }
+            }
+        }
+        return true;
     }
 
     void Solution::MachinePositionInit() {

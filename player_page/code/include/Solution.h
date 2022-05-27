@@ -22,6 +22,7 @@ namespace MiuiIsTheBest {
         std::vector<BoolType> region_energy_types;//所有区域对应的能源类型
         std::vector<Machine> machines;//所有机器的集合
         std::vector<Start> starts;
+        std::vector<short> machine_index;
         short num_flow_line = 0;
         short num_core_flow_line = 0;//流水线核心产线边数
         //其他变量
@@ -33,7 +34,7 @@ namespace MiuiIsTheBest {
         short num_cycle_windows = 0;
         void MachinePositionInit();
 
-        void MachineGraphInit();
+
 
         bool IsSuccessor(Machine *current_machine, short parent_index);
 
@@ -51,6 +52,8 @@ namespace MiuiIsTheBest {
 
     public:
         bool GetSolution();
+
+        bool MachineGraphInit();
 
         void OutPut();
 
