@@ -14,6 +14,8 @@
 
 namespace MiuiIsTheBest {
     class Solution {
+        int K;//生产次数
+        short manu_time[5];//能源加工时间
         std::vector<Window> windows;//所有窗口的集合
         std::vector<std::vector<short>> factories;//所有工厂的集合
         std::vector<FlowLine> flow_lines;//所有生产线的集合
@@ -35,9 +37,6 @@ namespace MiuiIsTheBest {
         void MachineGraphInit();
 
         bool IsSuccessor(short current_window, short previous_window, bool flow_line_type);
-
-        static void
-        GetEnergyOrder(const int *machine_energy_cost, short &first_energy, short &second_energy, short i, short j);
 
         void RegainCycleTimes();
 
