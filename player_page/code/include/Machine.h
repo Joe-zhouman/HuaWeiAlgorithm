@@ -51,14 +51,6 @@ namespace MiuiIsTheBest {
 
         bool OutOfPosition() { return current_position >= positions->size(); }//是否超出所在位置
 
-        short GetChildPosition(short index_child) {
-            if (children == nullptr) return -1;
-            for (short i = 0; i < children->size(); ++i) {
-                if (children->at(i) == index_child) return i;
-            }
-            return -1;
-        }
-
         ~Machine() {
             delete positions;
             delete parents;

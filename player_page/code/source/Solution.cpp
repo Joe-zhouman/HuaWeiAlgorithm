@@ -4,22 +4,14 @@
 #include "iostream"
 #include "Solution.h"
 #include "algorithm"
-#include "assert.h"
+//#include "assert.h"
 
-#define DEBUG
-#define FULL_OUTPUT
+//#define DEBUG
+//#define FULL_OUTPUT
 namespace MiuiIsTheBest {
-    void Solution::RegainCycleTimes() {
-        assert(!op_cycled_windows.empty());
-        std::vector<short> *cycled_windows = &op_cycled_windows.top();
-        for (short cycled_window: *cycled_windows) {
-            windows[cycled_window].rest_cycle_times++;
-        }
-        op_cycled_windows.pop();
-    }
 
     bool Solution::IsSuccessor(Machine *current_machine, short parent_index) {
-        assert(current_machine->parents != nullptr);
+//        assert(current_machine->parents != nullptr);
         short index_parent = machines[current_machine->parents->at(parent_index)].CurrentWindow();
         short index_current = current_machine->CurrentWindow();
         if (index_parent < index_current) return true;
@@ -42,19 +34,9 @@ namespace MiuiIsTheBest {
     Machine *Solution::GetCurrentMachine(short index_flow_line) {
         return &machines[flow_lines[index_flow_line].current_machine];
     }
-
     Machine *Solution::GetPreviousMachine(short index_flow_line) {
         return &machines[flow_lines[index_flow_line].previous_machine];
     }
-
-    short Solution::GetCurrentWindow(short index_flow_line) {
-        return GetCurrentMachine(index_flow_line)->CurrentWindow();
-    }
-
-    short Solution::GetPreviousWindow(short index_flow_line) {
-        return GetPreviousMachine(index_flow_line)->CurrentWindow();
-    }
-
     bool Solution::GetSolution() {
         std::vector<short> machine_index;
         short clock = 0;
@@ -64,11 +46,11 @@ namespace MiuiIsTheBest {
         index_current_step = machine_index.size() - 2;
         short index_current_machine;
         Machine *current_machine;
-        bool succesor = false;
+
         while (index_current_step >= 0 && index_current_step < machine_index.size()) {
-#ifdef DEBUG
-            std::cout << "Find Region for machine " << machine_index[index_current_step] << std::endl;
-#endif
+//#ifdef DEBUG
+//            std::cout << "Find Region for machine " << machine_index[index_current_step] << std::endl;
+//#endif
             index_current_machine = machine_index[index_current_step];
             current_machine = &machines[index_current_machine];
             if (current_machine->parents == nullptr) {
@@ -82,7 +64,8 @@ namespace MiuiIsTheBest {
             }
 
             while (!current_machine->OutOfPosition()) {
-                bool all_parent_ok = true;
+//                bool all_parent_ok = true;
+                bool succesor = false;
                 if (current_machine->parents != nullptr) {
                     for (short i = 0; i < current_machine->NumParents(); i++) {
                         succesor = IsSuccessor(current_machine, i);
@@ -93,11 +76,11 @@ namespace MiuiIsTheBest {
                         }
                     }
                     if (succesor) {
-#ifdef DEBUG
-                        std::cout << "Set window " << current_machine->CurrentWindow()
-                                  << " and region " << current_machine->CurrentRegion() << " for machine "
-                                  << machine_index[index_current_step] << std::endl;
-#endif
+//#ifdef DEBUG
+//                        std::cout << "Set window " << current_machine->CurrentWindow()
+//                                  << " and region " << current_machine->CurrentRegion() << " for machine "
+//                                  << machine_index[index_current_step] << std::endl;
+//#endif
                         break;
                     }
                 }
@@ -107,25 +90,25 @@ namespace MiuiIsTheBest {
             } else {
                 while (current_machine->OutOfPosition()) {
                     if (current_machine->parents == nullptr) return false;
-#ifdef DEBUG
-                    std::cout << "Machine " << machine_index[index_current_step] << " is out of position" << std::endl;
-#endif
-                    short back_tracking_position = 0;
-                    std::vector<short> *back_tracking_machins = current_machine->parents;
+//#ifdef DEBUG
+//                    std::cout << "Machine " << machine_index[index_current_step] << " is out of position" << std::endl;
+//#endif
+//                    short back_tracking_position = 0;
+                    std::vector<short> *back_tracking_machines = current_machine->parents;
                     short num_matched_wrong_parents = 0;
-                    while (num_matched_wrong_parents < back_tracking_machins->size()) {
+                    while (num_matched_wrong_parents < back_tracking_machines->size()) {
                         current_machine->RegainCycleTimes(windows);
                         current_machine->current_position = 0;
                         index_current_step++;
                         index_current_machine = machine_index[index_current_step];
                         current_machine = &machines[index_current_machine];
-#ifdef DEBUG
-                        std::cout << "Reset machine " << machine_index[index_current_step] << std::endl;
-#endif
-                        for (short index: *back_tracking_machins) {
+//#ifdef DEBUG
+//                        std::cout << "Reset machine " << machine_index[index_current_step] << std::endl;
+//#endif
+                        for (short index: *back_tracking_machines) {
                             if (index_current_machine == index) {
                                 num_matched_wrong_parents++;
-                                back_tracking_position = current_machine->current_position;
+//                                back_tracking_position = current_machine->current_position;
                             }
                         }
                     }
@@ -134,7 +117,6 @@ namespace MiuiIsTheBest {
                 }
             }
         }
-
         return index_current_step < num_machine;
     }
 
@@ -173,7 +155,6 @@ namespace MiuiIsTheBest {
             }
             windows.push_back(temp_window);
         }
-
         std::cin >> num_machine;
         for (short i = 0; i < num_machine; ++i) {
             short machine_type;
@@ -182,10 +163,8 @@ namespace MiuiIsTheBest {
             for (int j = 0; j < 5; j++) {
                 std::cin >> machines.back().cost[j];
             }
-
         }
         std::cin >> num_flow_line;
-
         for (short i = 0; i < num_flow_line; ++i) {
             FlowLine temp_flow_line;
             std::cin >> temp_flow_line.type >> temp_flow_line.previous_machine >> temp_flow_line.current_machine;
@@ -231,14 +210,7 @@ namespace MiuiIsTheBest {
 
     void Solution::MachineGraphInit() {
         for (FlowLine current_flow_line: flow_lines) {
-            if (machines[current_flow_line.current_machine].is_core) {
-                machines[current_flow_line.previous_machine].children->emplace_back(current_flow_line.current_machine);
-
-            } else {
-                machines[current_flow_line.previous_machine].children->insert(
-                        machines[current_flow_line.previous_machine].children->begin(),
-                        current_flow_line.current_machine);
-            }
+            machines[current_flow_line.previous_machine].children->emplace_back(current_flow_line.current_machine);
             machines[current_flow_line.current_machine].connect_types->emplace_back(current_flow_line.type);
             machines[current_flow_line.current_machine].parents->emplace_back(current_flow_line.previous_machine);
             machines[current_flow_line.current_machine].cycled_windows->emplace_back(-1);
@@ -313,11 +285,11 @@ namespace MiuiIsTheBest {
             }
         }
         std::cout << '\n';
-#ifdef FULL_OUTPUT
-        for (Machine &current_machine: machines) {
-            std::cout << current_machine.CurrentWindow() << ' ';
-        }
-        std::cout << '\n';
-#endif
+//#ifdef FULL_OUTPUT
+//        for (Machine &current_machine: machines) {
+//            std::cout << current_machine.CurrentWindow() << ' ';
+//        }
+//        std::cout << '\n';
+//#endif
     }
 } // MiuiIsTheBest

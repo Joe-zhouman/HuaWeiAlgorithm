@@ -31,22 +31,15 @@ namespace MiuiIsTheBest {
         short num_windows = 0;
         short num_regions = 0;
         short num_cycle_windows = 0;
-        std::stack<std::vector<short>> op_cycled_windows;//每次操作使用回环的窗口记录栈
         void MachinePositionInit();
 
         void MachineGraphInit();
 
         bool IsSuccessor(Machine *current_machine, short parent_index);
 
-        void RegainCycleTimes();
-
         Machine *GetCurrentMachine(short index_flow_line);
 
         Machine *GetPreviousMachine(short index_flow_line);
-
-        short GetCurrentWindow(short index_flow_line);
-
-        short GetPreviousWindow(short index_flow_line);
 
         bool TSort(short index_current_machine, short &clock, std::vector<short> *S);
     public:
