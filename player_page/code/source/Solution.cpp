@@ -39,12 +39,20 @@ namespace MiuiIsTheBest {
     }
     bool Solution::GetSolution() {
         std::vector<short> machine_index;
-        for (short start: starts) {
-            if (!TSort(start, &machine_index)) {
+        for (Start &start: starts) {
+            if (!TSort(start.index, &machine_index)) {
+                return false;
+            }
+            start.depth = machine_index.size();
+            machine_index.clear();
+            Reset();
+        }
+        std::sort(starts.begin(), starts.end());
+        for (Start start: starts) {
+            if (!TSort(start.index, &machine_index)) {
                 return false;
             }
         }
-
         if (machine_index.size() < 1)return false;
         index_current_step = machine_index.size() - 1;
         short index_current_machine;
@@ -219,7 +227,7 @@ namespace MiuiIsTheBest {
         for (short i = 0; i < num_machine; i++) {
             if (machines[i].parents->size() == 0) {
                 machines[i].parents = nullptr;
-                starts.emplace_back(i);
+                starts.emplace_back(Start(i));
             }
             if (machines[i].children->size() == 0)machines[i].children = nullptr;
         }

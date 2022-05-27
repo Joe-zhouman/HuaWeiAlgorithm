@@ -12,12 +12,6 @@ namespace MiuiIsTheBest {
         bool operator<(const Position &p) const {
             return cost < p.cost;
         }
-        bool operator==(const Position &p) const {
-            return cost == p.cost;
-        }
-        bool operator>(const Position &p) const {
-            return cost > p.cost;
-        }
         Position(short window, short region, unsigned int cost) :
                 window(window), region(region), cost(cost) {}
     };

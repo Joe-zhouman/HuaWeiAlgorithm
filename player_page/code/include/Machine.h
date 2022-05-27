@@ -14,6 +14,7 @@ namespace MiuiIsTheBest {
     class Machine {
     public:
         short current_position = 0;//当前所在的许用位置
+        short depth = 0;
         unsigned int cost[5];//使用不同能源的费用
         std::vector<Position> *positions;//所有的容许位置
         std::vector<short> *parents;//父节点
@@ -49,6 +50,7 @@ namespace MiuiIsTheBest {
         }
 
         Machine(const Machine &m) {
+            depth = m.depth;
             current_position = m.current_position;
             status = m.status;
             type = m.type;
