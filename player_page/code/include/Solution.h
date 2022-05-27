@@ -36,7 +36,7 @@ namespace MiuiIsTheBest {
 
         void MachineGraphInit();
 
-        bool IsSuccessor(short current_window, short previous_window, bool flow_line_type);
+        bool IsSuccessor(Machine *current_machine, short parent_index);
 
         void RegainCycleTimes();
 

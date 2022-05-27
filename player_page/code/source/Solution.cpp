@@ -18,25 +18,25 @@ namespace MiuiIsTheBest {
         op_cycled_windows.pop();
     }
 
-    bool Solution::IsSuccessor(short current_window, short previous_window, bool flow_line_type) {
-        bool result = false;
-        std::vector<short> cycled_windows;
-        if (previous_window < current_window) result = true;
-        if (previous_window > current_window && previous_window < num_cycle_windows &&
+    bool Solution::IsSuccessor(Machine *current_machine, short parent_index) {
+        assert(current_machine->parents != nullptr);
+        short index_parent = machines[current_machine->parents->at(parent_index)].CurrentWindow();
+        short index_current = current_machine->CurrentWindow();
+        if (index_parent < index_current) return true;
+        if (index_parent > index_current && index_parent < num_cycle_windows &&
             windows[num_cycle_windows - 1].rest_cycle_times > 0) {
             windows[num_cycle_windows - 1].rest_cycle_times--;
-            cycled_windows.emplace_back(num_cycle_windows - 1);
-            result = true;
+            current_machine->cycled_windows->at(parent_index) = num_cycle_windows - 1;
+            return true;
         }
-        if (previous_window == current_window && flow_line_type) result = true;
-        if (previous_window == current_window && !flow_line_type && windows[current_window].rest_cycle_times > 0) {
-            windows[current_window].rest_cycle_times--;
-            cycled_windows.emplace_back(current_window);
-            result = true;
+        if (index_parent == index_current && current_machine->connect_types->at(parent_index)) return true;
+        if (index_parent == index_current && !current_machine->connect_types->at(parent_index) &&
+            windows[index_parent].rest_cycle_times > 0) {
+            windows[index_current].rest_cycle_times--;
+            current_machine->cycled_windows->at(parent_index) = index_current;
+            return true;
         }
-        op_cycled_windows.push(cycled_windows);
-        return result;
-
+        return false;
     }
 
     Machine *Solution::GetCurrentMachine(short index_flow_line) {
@@ -67,97 +67,70 @@ namespace MiuiIsTheBest {
         bool succesor = false;
         while (index_current_step >= 0 && index_current_step < machine_index.size()) {
 #ifdef DEBUG
-            std::cout<<"Find Region for machine "<<machine_index[index_current_step]<<std::endl;
+            std::cout << "Find Region for machine " << machine_index[index_current_step] << std::endl;
 #endif
             index_current_machine = machine_index[index_current_step];
             current_machine = &machines[index_current_machine];
-            std::vector<short> index_wrong_parent;
-            if (current_machine->parents == nullptr && current_machine->OutOfPosition()) {
-                return false;
+            if (current_machine->parents == nullptr) {
+                current_machine->current_position++;
+                if (current_machine->OutOfPosition()) {
+                    return false;
+                }
+                index_current_step--;
+                index_current_machine = machine_index[index_current_step];
+                current_machine = &machines[index_current_machine];
             }
+
             while (!current_machine->OutOfPosition()) {
                 bool all_parent_ok = true;
-                index_wrong_parent.clear();
                 if (current_machine->parents != nullptr) {
-                    for (short index_parent: *current_machine->parents) {
-                        succesor = IsSuccessor(current_machine->CurrentWindow(),
-                                               machines[index_parent].CurrentWindow(),
-                                               machines[index_parent].GetChildConnectType(index_current_machine));
-
+                    for (short i = 0; i < current_machine->NumParents(); i++) {
+                        succesor = IsSuccessor(current_machine, i);
                         if (!succesor) {
-                            index_wrong_parent.emplace_back(index_parent);
-                            all_parent_ok = false;
+                            current_machine->RegainCycleTimes(windows);
+                            current_machine->current_position++;
+                            break;
                         }
                     }
-                    if (all_parent_ok) {
+                    if (succesor) {
 #ifdef DEBUG
-                        std::cout<<"Set window "<<current_machine->CurrentWindow()
-                        <<" and region "<<current_machine->CurrentRegion()<<" for machine "
-                        <<machine_index[index_current_step]<<std::endl;
+                        std::cout << "Set window " << current_machine->CurrentWindow()
+                                  << " and region " << current_machine->CurrentRegion() << " for machine "
+                                  << machine_index[index_current_step] << std::endl;
 #endif
                         break;
                     }
-                    for (int i = 0; i < current_machine->parents->size(); ++i) {
-                        RegainCycleTimes();
-                    }
-                    current_machine->current_position++;
-                    continue;
                 }
             }
             if (!current_machine->OutOfPosition()) {
                 index_current_step--;
-                continue;
             } else {
-                if (current_machine->parents == nullptr) return false;
-                for (int i = 0; i < current_machine->parents->size(); i++) {
-                    RegainCycleTimes();
-                }
-                index_current_step++;
-                short back_tracking_position = 0;
-                for (short num_matched_wrong_parents = 0;; index_current_step++) {
-#ifdef DEBUG
-                    std::cout << "Reset machine " << machine_index[index_current_step] << std::endl;
-#endif
-                    index_current_machine = machine_index[index_current_step];
-                    current_machine = &machines[index_current_machine];
-                    for (short index: index_wrong_parent) {
-                        if (index_current_machine == index) {
-                            num_matched_wrong_parents++;
-                        }
-                    }
-                    if (num_matched_wrong_parents == index_wrong_parent.size())break;
-                    for (int i = 0; i < current_machine->parents->size(); ++i) {
-                        RegainCycleTimes();
-                    }
-                    current_machine->current_position = 0;
-                }
-                current_machine->current_position++;
                 while (current_machine->OutOfPosition()) {
-                    index_wrong_parent.clear();
                     if (current_machine->parents == nullptr) return false;
-                    for (short index: *current_machine->parents) {
-                        index_wrong_parent.emplace_back(index);
-                    }
-                    for (short num_matched_wrong_parents = 0;; index_current_step++) {
 #ifdef DEBUG
-                        std::cout << "Reset machine " << machine_index[index_current_step]
-                                  << " for out of position" << std::endl;
+                    std::cout << "Machine " << machine_index[index_current_step] << " is out of position" << std::endl;
 #endif
+                    short back_tracking_position = 0;
+                    std::vector<short> *back_tracking_machins = current_machine->parents;
+                    short num_matched_wrong_parents = 0;
+                    while (num_matched_wrong_parents < back_tracking_machins->size()) {
+                        current_machine->RegainCycleTimes(windows);
+                        current_machine->current_position = 0;
+                        index_current_step++;
                         index_current_machine = machine_index[index_current_step];
                         current_machine = &machines[index_current_machine];
-
-                        for (short index: index_wrong_parent) {
+#ifdef DEBUG
+                        std::cout << "Reset machine " << machine_index[index_current_step] << std::endl;
+#endif
+                        for (short index: *back_tracking_machins) {
                             if (index_current_machine == index) {
                                 num_matched_wrong_parents++;
+                                back_tracking_position = current_machine->current_position;
                             }
                         }
-                        if (num_matched_wrong_parents == index_wrong_parent.size())break;
-                        for (int i = 0; i < current_machine->parents->size(); ++i) {
-                            RegainCycleTimes();
-                        }
-                        current_machine->current_position = 0;
                     }
                     current_machine->current_position++;
+                    current_machine->RegainCycleTimes(windows);
                 }
             }
         }
@@ -260,15 +233,15 @@ namespace MiuiIsTheBest {
         for (FlowLine current_flow_line: flow_lines) {
             if (machines[current_flow_line.current_machine].is_core) {
                 machines[current_flow_line.previous_machine].children->emplace_back(current_flow_line.current_machine);
-                machines[current_flow_line.previous_machine].connect_types->emplace_back(current_flow_line.type);
+
             } else {
                 machines[current_flow_line.previous_machine].children->insert(
                         machines[current_flow_line.previous_machine].children->begin(),
                         current_flow_line.current_machine);
-                machines[current_flow_line.previous_machine].connect_types->insert(
-                        machines[current_flow_line.previous_machine].connect_types->begin(), current_flow_line.type);
             }
+            machines[current_flow_line.current_machine].connect_types->emplace_back(current_flow_line.type);
             machines[current_flow_line.current_machine].parents->emplace_back(current_flow_line.previous_machine);
+            machines[current_flow_line.current_machine].cycled_windows->emplace_back(-1);
         }
         for (Machine &machine: machines) {
             if (machine.parents->size() == 0)machine.parents = nullptr;
