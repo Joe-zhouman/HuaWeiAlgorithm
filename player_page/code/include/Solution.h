@@ -34,8 +34,6 @@ namespace MiuiIsTheBest {
         short num_cycle_windows = 0;
         void MachinePositionInit();
 
-
-
         bool IsSuccessor(Machine *current_machine, short parent_index);
 
         Machine *GetCurrentMachine(short index_flow_line);

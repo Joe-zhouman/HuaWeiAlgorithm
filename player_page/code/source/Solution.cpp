@@ -278,17 +278,17 @@ namespace MiuiIsTheBest {
                 }
             }
         }
-        for (Machine &machine: machines) {
-            for (int i = 0; i < machine.positions->size(); ++i) {
-                unsigned int cost = 0;
-                cost += machine.cost[region_energy_types[machine.positions->at(i).region].ToInt()];
-                if (machine.is_core) {
-                    cost += manu_time[machine.type.ToInt()] * (K + windows[machine.positions->at(i).window].cost_coeff);
-                }
-                machine.positions->at(i).cost = cost;
-            }
-            std::sort(machine.positions->begin(), machine.positions->end());
-        }
+//        for (Machine &machine: machines) {
+//            for (int i = 0; i < machine.positions->size(); ++i) {
+//                unsigned int cost = 0;
+//                cost += machine.cost[region_energy_types[machine.positions->at(i).region].ToInt()];
+//                if (machine.is_core) {
+//                    cost += manu_time[machine.type.ToInt()] * (K + windows[machine.positions->at(i).window].cost_coeff);
+//                }
+//                machine.positions->at(i).cost = cost;
+//            }
+//            std::sort(machine.positions->begin(), machine.positions->end());
+//        }
     }
 
     void Solution::OutPut() {
