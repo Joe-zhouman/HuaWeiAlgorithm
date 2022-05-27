@@ -21,7 +21,7 @@ namespace MiuiIsTheBest {
         std::vector<FlowLine> flow_lines;//所有生产线的集合
         std::vector<BoolType> region_energy_types;//所有区域对应的能源类型
         std::vector<Machine> machines;//所有机器的集合
-
+        std::vector<short> starts;
         short num_flow_line = 0;
         short num_core_flow_line = 0;//流水线核心产线边数
         //其他变量

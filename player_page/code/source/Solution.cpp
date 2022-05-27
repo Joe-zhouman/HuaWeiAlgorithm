@@ -39,13 +39,14 @@ namespace MiuiIsTheBest {
     }
     bool Solution::GetSolution() {
         std::vector<short> machine_index;
-        short clock = 0;
-        if (!TSort(0, &machine_index)) {
-            return false;
+        for (short start: starts) {
+            if (!TSort(start, &machine_index)) {
+                return false;
+            }
         }
+
         if (machine_index.size() < 1)return false;
-        if (machine_index.size() < 2)return true;
-        index_current_step = machine_index.size() - 2;
+        index_current_step = machine_index.size() - 1;
         short index_current_machine;
         Machine *current_machine;
 
@@ -55,19 +56,18 @@ namespace MiuiIsTheBest {
 //#endif
             index_current_machine = machine_index[index_current_step];
             current_machine = &machines[index_current_machine];
-            if (current_machine->parents == nullptr) {
-                current_machine->current_position++;
-                if (current_machine->OutOfPosition()) {
-                    return false;
-                }
-                index_current_step--;
-                index_current_machine = machine_index[index_current_step];
-                current_machine = &machines[index_current_machine];
-            }
+//            if (current_machine->parents == nullptr) {
+//                current_machine->current_position++;
+//                if (current_machine->OutOfPosition()) {
+//                    return false;
+//                }
+//                index_current_step--;
+//                index_current_machine = machine_index[index_current_step];
+//                current_machine = &machines[index_current_machine];
+//            }
             while (!current_machine->OutOfPosition()) {
-//                bool all_parent_ok = true;
-                bool succesor = false;
                 if (current_machine->parents != nullptr) {
+                    bool succesor = false;
                     for (short i = 0; i < current_machine->NumParents(); i++) {
                         succesor = IsSuccessor(current_machine, i);
                         if (!succesor) {
@@ -84,6 +84,8 @@ namespace MiuiIsTheBest {
 //#endif
                         break;
                     }
+                } else {
+                    break;
                 }
             }
             if (!current_machine->OutOfPosition()) {
@@ -214,9 +216,12 @@ namespace MiuiIsTheBest {
             machines[current_flow_line.current_machine].parents->emplace_back(current_flow_line.previous_machine);
             machines[current_flow_line.current_machine].cycled_windows->emplace_back(-1);
         }
-        for (Machine &machine: machines) {
-            if (machine.parents->size() == 0)machine.parents = nullptr;
-            if (machine.children->size() == 0)machine.children = nullptr;
+        for (short i = 0; i < num_machine; i++) {
+            if (machines[i].parents->size() == 0) {
+                machines[i].parents = nullptr;
+                starts.emplace_back(i);
+            }
+            if (machines[i].children->size() == 0)machines[i].children = nullptr;
         }
     }
 
