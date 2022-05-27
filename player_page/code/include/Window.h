@@ -13,8 +13,6 @@ namespace MiuiIsTheBest {
         short cost_coeff;//窗口费用系数
         bool init_type[3];//预处理支持类型
     };
-
-
 } // MiuiIsTheBest
 
 #endif //HUAWEIALGORITHM_WINDOW_H

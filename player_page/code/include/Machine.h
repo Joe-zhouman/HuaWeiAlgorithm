@@ -12,19 +12,8 @@
 namespace MiuiIsTheBest {
 
     class Machine {
-    private:
-        void NewPointer() {
-
-            positions = new std::vector<Position>;
-            parents = new std::vector<short>;
-            children = new std::vector<short>;
-            connect_types = new std::vector<bool>;
-            cycled_windows = new std::vector<short>;
-        }
-
     public:
         short current_position = 0;//当前所在的许用位置
-        short depth = 0;//在生成树中的位置
         unsigned int cost[5];//使用不同能源的费用
         std::vector<Position> *positions;//所有的容许位置
         std::vector<short> *parents;//父节点
@@ -61,25 +50,38 @@ namespace MiuiIsTheBest {
 
         Machine(const Machine &m) {
             current_position = m.current_position;
-            depth = m.depth;
             status = m.status;
             type = m.type;
             is_core = m.is_core;
             for (int i = 0; i < 5; ++i) {
                 cost[i] = m.cost[i];
             }
-            NewPointer();
+
+            positions = new std::vector<Position>;
+            parents = new std::vector<short>;
+            children = new std::vector<short>;
+            connect_types = new std::vector<bool>;
+            cycled_windows = new std::vector<short>;
         }
 
         explicit Machine(short machine_type_number)
                 : type(BoolType(machine_type_number)) {
-            NewPointer();
+
+            positions = new std::vector<Position>;
+            parents = new std::vector<short>;
+            children = new std::vector<short>;
+            connect_types = new std::vector<bool>;
+            cycled_windows = new std::vector<short>;
             for (unsigned int &i: cost) {
                 i = 0;
             }
         }
         Machine() {
-            NewPointer();
+            positions = new std::vector<Position>;
+            parents = new std::vector<short>;
+            children = new std::vector<short>;
+            connect_types = new std::vector<bool>;
+            cycled_windows = new std::vector<short>;
             for (int i = 0; i < 5; ++i) {
                 cost[i] = 0;
             }

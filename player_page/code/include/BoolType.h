@@ -15,7 +15,7 @@ namespace MiuiIsTheBest {
             return (first_bit == p.first_bit && second_bit == p.second_bit && third_bit == p.third_bit);
         }
 
-        int ToInt() const {
+        int ToInt() {
             return first_bit * 1 + second_bit * 2 + third_bit * 4;
         }
 

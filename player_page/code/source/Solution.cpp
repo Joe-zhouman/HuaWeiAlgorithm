@@ -40,14 +40,16 @@ namespace MiuiIsTheBest {
     bool Solution::GetSolution() {
         std::vector<short> machine_index;
         short clock = 0;
-        if (!TSort(0, clock, &machine_index)) {
+        if (!TSort(0, &machine_index)) {
             return false;
         }
+        if (machine_index.size() < 1)return false;
+        if (machine_index.size() < 2)return true;
         index_current_step = machine_index.size() - 2;
         short index_current_machine;
         Machine *current_machine;
 
-        while (index_current_step >= 0 && index_current_step < machine_index.size()) {
+        while (index_current_step >= 0 && index_current_step < num_machine) {
 //#ifdef DEBUG
 //            std::cout << "Find Region for machine " << machine_index[index_current_step] << std::endl;
 //#endif
@@ -62,7 +64,6 @@ namespace MiuiIsTheBest {
                 index_current_machine = machine_index[index_current_step];
                 current_machine = &machines[index_current_machine];
             }
-
             while (!current_machine->OutOfPosition()) {
 //                bool all_parent_ok = true;
                 bool succesor = false;
@@ -119,7 +120,6 @@ namespace MiuiIsTheBest {
         }
         return index_current_step < num_machine;
     }
-
     Solution::Solution() {
         std::cin >> K;
         std::cin >> manu_time[0] >> manu_time[1] >> manu_time[2] >> manu_time[3] >> manu_time[4];
@@ -186,16 +186,15 @@ namespace MiuiIsTheBest {
         MachineGraphInit();
     }
 
-    bool Solution::TSort(short index_machine, short &clock, std::vector<short> *S) {
+    bool Solution::TSort(short index_machine, std::vector<short> *S) {
         Machine *current_machine = &machines[index_machine];
-        current_machine->depth = ++clock;
         current_machine->status = V_STATUS::DISCOVERED;
         for (short u = 0; current_machine->children != nullptr && u < current_machine->children->size(); u++) {
             short index_current_child = current_machine->children->at(u);
             Machine *current_child = &machines[index_current_child];
             switch (current_child->status) {
                 case V_STATUS::UNDISCOVERED:
-                    if (!TSort(index_current_child, clock, S)) return false;
+                    if (!TSort(index_current_child, S)) return false;
                     break;
                 case V_STATUS::DISCOVERED:
                     return false;
