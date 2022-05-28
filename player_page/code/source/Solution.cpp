@@ -296,21 +296,21 @@ namespace MiuiIsTheBest {
         }
         std::cout << '\n';
         std::cout << num_core_flow_line + 1 << '\n';
-        int start_machine;
-        for (Start start: starts) {
-            if (machines[start.index].is_core) {
-                start_machine = start.index;
+        std::vector<int> core_line_machines;
+        for (int core_index: core_flow_lines) {
+            int previous_machine = flow_lines[core_index].previous_machine;
+            int current_machine = flow_lines[core_index].current_machine;
+            if (core_line_machines.empty()) {
+                core_line_machines.emplace_back(previous_machine);
+                core_line_machines.emplace_back(current_machine);
+            } else if (previous_machine == core_line_machines.back()) {
+                core_line_machines.emplace_back(current_machine);
+            } else if (current_machine == core_line_machines.front()) {
+                core_line_machines.emplace(core_line_machines.begin(), previous_machine);
             }
         }
-        Machine *current_machine = &machines[start_machine];
-        while (true) {
-            std::cout << current_machine->CurrentWindow() << " ";
-            if (current_machine->children == nullptr)break;
-            for (Start start: *current_machine->children) {
-                if (machines[start.index].is_core) {
-                    current_machine = &machines[start.index];
-                }
-            }
+        for (int index: core_line_machines) {
+            std::cout << machines[index].CurrentWindow() << " ";
         }
 
 //#ifdef FULL_OUTPUT
