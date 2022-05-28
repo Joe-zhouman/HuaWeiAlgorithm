@@ -19,7 +19,7 @@ namespace MiuiIsTheBest {
         std::vector<Window> windows;//所有窗口的集合
         std::vector<std::vector<int>> factories;//所有工厂的集合
         std::vector<FlowLine> flow_lines;//所有生产线的集合
-        std::vector<BoolType> region_energy_types;//所有区域对应的能源类型
+        std::vector<int> region_energy_types;//所有区域对应的能源类型
         std::vector<Machine> machines;//所有机器的集合
         std::vector<Start> starts;
         std::vector<int> machine_index;

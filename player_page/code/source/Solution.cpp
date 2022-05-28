@@ -133,7 +133,7 @@ namespace MiuiIsTheBest {
         for (int i = 0; i < num_regions; ++i) {
             std::cin >> factory >> energy;
             factories[factory].emplace_back(i);
-            region_energy_types.emplace_back(BoolType(energy));
+            region_energy_types.emplace_back(energy);
         }
         int max_cycle_times;
         std::cin >> max_cycle_times;
@@ -237,31 +237,39 @@ namespace MiuiIsTheBest {
     }
 
     void Solution::MachinePositionInit() {
-        for (Machine &current_machine: machines) {
-            for (int index_window = 0; index_window < num_windows; index_window++) {
-                Window *current_window = &windows[index_window];
-                int current_machine_type = current_machine.type.ToInt();
-                if (!current_machine.is_core ||
-                    (current_machine.is_core && current_window->init_type[current_machine_type])) {
-                    for (int index_region: factories[current_window->factory]) {
-                        if (current_machine_type == 0) {
-                            if (region_energy_types[index_region] == BoolType(0) ||
-                                region_energy_types[index_region] == BoolType(1)) {
-                                current_machine.positions->emplace_back(Position(index_window, index_region, 0));
-                            }
-                        } else if (current_machine_type == 1) {
-                            if (region_energy_types[index_region] == BoolType(0) ||
-                                region_energy_types[index_region] == BoolType(2)) {
-                                current_machine.positions->emplace_back(Position(index_window, index_region, 0));
-                            }
-                        } else if (current_machine_type == 2) {
-                            if (region_energy_types[index_region] == BoolType(3) ||
-                                region_energy_types[index_region] == BoolType(4)) {
-                                current_machine.positions->emplace_back(Position(index_window, index_region, 0));
-                            }
-                        }
+        std::vector<Position> CorePosition[3];
+//        std::vector<Position> CorePosition2;
+//        std::vector<Position> CorePosition3;
+        std::vector<Position> NonCorePosition[3];
+//        std::vector<Position> NonCorePosition2;
+//        std::vector<Position> NonCorePosition3;
+        for (int index_window = 0; index_window < num_windows; index_window++) {
+            for (int index_region: factories[windows[index_window].factory]) {
+                if (region_energy_types[index_region] == 0 || region_energy_types[index_region] == 1) {
+                    NonCorePosition[0].emplace_back(Position(index_window, index_region, 0));
+                    if (windows[index_window].init_type[0]) {
+                        CorePosition[0].emplace_back(Position(index_window, index_region, 0));
                     }
                 }
+                if (region_energy_types[index_region] == 0 || region_energy_types[index_region] == 2) {
+                    NonCorePosition[1].emplace_back(Position(index_window, index_region, 0));
+                    if (windows[index_window].init_type[1]) {
+                        CorePosition[1].emplace_back(Position(index_window, index_region, 0));
+                    }
+                }
+                if (region_energy_types[index_region] == 3 || region_energy_types[index_region] == 4) {
+                    NonCorePosition[2].emplace_back(Position(index_window, index_region, 0));
+                    if (windows[index_window].init_type[2]) {
+                        CorePosition[2].emplace_back(Position(index_window, index_region, 0));
+                    }
+                }
+            }
+        }
+        for (Machine &current_machine: machines) {
+            if (current_machine.is_core) {
+                current_machine.positions = &CorePosition[current_machine.type];
+            } else {
+                current_machine.positions = &NonCorePosition[current_machine.type];
             }
         }
 //        for (Machine &machine: machines) {
