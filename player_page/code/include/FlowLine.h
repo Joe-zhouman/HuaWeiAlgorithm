@@ -11,7 +11,6 @@ namespace MiuiIsTheBest {
         bool type;//0,1
         int previous_machine;
         int current_machine;
-        bool is_core;
     };
 
 } // MiuiIsTheBest

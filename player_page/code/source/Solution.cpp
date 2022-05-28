@@ -175,7 +175,6 @@ namespace MiuiIsTheBest {
         for (int i = 0; i < num_core_flow_line; ++i) {
             std::cin >> index_core_flow_line;
             core_flow_lines.emplace_back(index_core_flow_line);
-            flow_lines[index_core_flow_line].is_core = true;
             machines[flow_lines[index_core_flow_line].current_machine].is_core = true;
             machines[flow_lines[index_core_flow_line].previous_machine].is_core = true;
         }
