@@ -38,11 +38,7 @@ namespace MiuiIsTheBest {
 
         bool IsSuccessor(Machine *current_machine, int parent_index);
 
-        Machine *GetCurrentMachine(int index_flow_line);
-
-        Machine *GetPreviousMachine(int index_flow_line);
-
-        bool TSort(int index_machine, std::vector<int> *S, int &clock);
+        bool TSort(int index_machine, std::vector<int> *S);
 
         void Reset() {
             for (Machine &machine: machines) {
