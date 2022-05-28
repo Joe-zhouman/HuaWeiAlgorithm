@@ -12,6 +12,7 @@ namespace MiuiIsTheBest {
         int rest_cycle_times;//剩余的环回次数
         int cost_coeff;//窗口费用系数
         bool init_type[3];//预处理支持类型
+        unsigned int cost = 0;
     };
 } // MiuiIsTheBest
 

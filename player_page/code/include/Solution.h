@@ -35,7 +35,7 @@ namespace MiuiIsTheBest {
         int num_windows = 0;
         int num_regions = 0;
         int num_cycle_windows = 0;
-
+        unsigned int total_cost[6];
         void MachinePositionInit();
 
         bool IsSuccessor(Machine *current_machine, int parent_index);
