@@ -269,6 +269,10 @@ namespace MiuiIsTheBest {
                 }
             }
         }
+
+        unsigned int CoreCost[3];
+        unsigned int NoneCoreCost[3];
+
         for (Machine &current_machine: machines) {
             if (current_machine.is_core) {
                 current_machine.positions = CorePosition[current_machine.type];
@@ -277,12 +281,11 @@ namespace MiuiIsTheBest {
             }
         }
         for (Machine &machine: machines) {
+            if (!machine.is_core)continue;
             for (int i = 0; i < machine.positions.size(); ++i) {
                 unsigned int cost = 0;
                 cost += machine.cost[region_energy_types[machine.positions[i].region]];
-                if (machine.is_core) {
-                    cost += manu_time[machine.type] * (K + windows[machine.positions.at(i).window].cost_coeff);
-                }
+                cost += manu_time[machine.type] * (K + windows[machine.positions.at(i).window].cost_coeff);
                 machine.positions.at(i).cost = cost;
             }
             std::sort(machine.positions.begin(), machine.positions.end());
