@@ -315,10 +315,10 @@ namespace MiuiIsTheBest {
         }
         std::cout << '\n';
 //#ifdef FULL_OUTPUT
-        for (Machine &current_machine: machines) {
-            std::cout << current_machine.CurrentWindow() << ' ';
-        }
-        std::cout << '\n';
+//        for (Machine &current_machine: machines) {
+//            std::cout << current_machine.CurrentWindow() << ' ';
+//        }
+//        std::cout << '\n';
 //#endif
     }
 } // MiuiIsTheBest
