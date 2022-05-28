@@ -31,18 +31,9 @@ namespace MiuiIsTheBest {
         return false;
     }
 
-    Machine *Solution::GetCurrentMachine(int index_flow_line) {
-        return &machines[flow_lines[index_flow_line].current_machine];
-    }
-
-    Machine *Solution::GetPreviousMachine(int index_flow_line) {
-        return &machines[flow_lines[index_flow_line].previous_machine];
-    }
-
     bool Solution::GetSolution() {
         for (Start &start: starts) {
-            int clock = 0;
-            if (!TSort(start.index, &machine_index, clock)) {
+            if (!TSort(start.index, &machine_index)) {
                 return false;
             }
             start.depth = machine_index.size();
@@ -52,7 +43,7 @@ namespace MiuiIsTheBest {
         int clock = 0;
         std::sort(starts.begin(), starts.end());
         for (Start start: starts) {
-            if (!TSort(start.index, &machine_index, clock)) {
+            if (!TSort(start.index, &machine_index)) {
                 return false;
             }
         }
@@ -191,9 +182,8 @@ namespace MiuiIsTheBest {
         MachinePositionInit();
     }
 
-    bool Solution::TSort(int index_machine, std::vector<int> *S, int &clock) {
+    bool Solution::TSort(int index_machine, std::vector<int> *S) {
         Machine *current_machine = &machines[index_machine];
-        current_machine->depth = ++clock;
         current_machine->status = V_STATUS::DISCOVERED;
         if (current_machine->children != nullptr) {
             for (int u = 0; u < current_machine->children->size(); u++) {
@@ -201,7 +191,7 @@ namespace MiuiIsTheBest {
                 Machine *current_child = &machines[index_current_child];
                 switch (current_child->status) {
                     case V_STATUS::UNDISCOVERED:
-                        if (!TSort(index_current_child, S, clock)) return false;
+                        if (!TSort(index_current_child, S)) return false;
                         break;
                     case V_STATUS::DISCOVERED:
                         return false;
@@ -229,21 +219,20 @@ namespace MiuiIsTheBest {
             }
             if (machines[i].children->size() == 0)machines[i].children = nullptr;
         }
-        for (Machine &machine: machines) {
-            if (machine.children == nullptr)continue;
-            if (machine.children->size() > 1) {
-                for (Start &start: *machine.children) {
-                    int clock = 0;
-                    if (!TSort(start.index, &machine_index, clock)) {
-                        return false;
-                    }
-                    start.depth = machine_index.size();
-                    std::sort(machine.children->begin(), machine.children->end());
-                    machine_index.clear();
-                    Reset();
-                }
-            }
-        }
+//        for (Machine &machine: machines) {
+//            if (machine.children == nullptr)continue;
+//            if (machine.children->size() > 1) {
+//                for (Start &start: *machine.children) {
+//                    if (!TSort(start.index, &machine_index)) {
+//                        return false;
+//                    }
+//                    start.depth = machine_index.size();
+//                    std::sort(machine.children->begin(), machine.children->end());
+//                    machine_index.clear();
+//                    Reset();
+//                }
+//            }
+//        }
         return true;
     }
 
@@ -313,6 +302,7 @@ namespace MiuiIsTheBest {
         }
 
 //#ifdef FULL_OUTPUT
+//        std::cout<<std::endl;
 //        for (Machine &current_machine: machines) {
 //            std::cout << current_machine.CurrentWindow() << ' ';
 //        }
