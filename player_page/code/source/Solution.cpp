@@ -22,35 +22,35 @@ namespace MiuiIsTheBest {
             return true;
         }
         if (index_parent == index_current && current_machine->connect_types->at(parent_index)) return true;
-        if (index_parent == index_current && !current_machine->connect_types->at(parent_index) &&
-            windows[index_parent].rest_cycle_times > 0) {
-            windows[index_current].rest_cycle_times--;
-            current_machine->cycled_windows->at(parent_index) = index_current;
-            return true;
-        }
-        return false;
-    }
+if (index_parent == index_current && !current_machine->connect_types->at(parent_index) &&
+windows[index_parent].rest_cycle_times > 0) {
+windows[index_current].rest_cycle_times--;
+current_machine->cycled_windows->at(parent_index) = index_current;
+return true;
+}
+return false;
+}
 
-    bool Solution::GetSolution() {
-//        for (Start &start: starts) {
-//            if (!TSort(start.index, &machine_index)) {
-//                return false;
-//            }
-//            start.depth = machine_index.size();
-//            machine_index.clear();
-//            Reset();
-//        }
-//        std::sort(starts.begin(), starts.end());
-        for (Start start: starts) {
-            if (!TSort(start.index, &machine_index)) {
-                return false;
-            }
-        }
-        for (int i = 0; i < machine_index.size(); ++i) {
-            machines[machine_index[i]].depth = i;
-        }
-        if (machine_index.size() < 1)return false;
-        index_current_step = machine_index.size() - 1;
+bool Solution::GetSolution() {
+for (Start &start: starts) {
+if (!TSort(start.index, &machine_index)) {
+return false;
+}
+start.depth = machine_index.size();
+machine_index.clear();
+Reset();
+}
+std::sort(starts.begin(), starts.end());
+for (Start start: starts) {
+if (!TSort(start.index, &machine_index)) {
+return false;
+}
+}
+for (int i = 0; i < machine_index.size(); ++i) {
+machines[machine_index[i]].depth = i;
+}
+if (machine_index.size() < 1)return false;
+index_current_step = machine_index.size() - 1;
         int index_current_machine;
         Machine *current_machine;
 
@@ -259,21 +259,27 @@ namespace MiuiIsTheBest {
                     NonCorePosition[1].emplace_back(Position(index_window, index_region, 0));
                     if (windows[index_window].init_type[1]) {
                         CorePosition[1].emplace_back(Position(index_window, index_region, 0));
-                    }
-                }
-                if (region_energy_types[index_region] == 3 || region_energy_types[index_region] == 4) {
-                    NonCorePosition[2].emplace_back(Position(index_window, index_region, 0));
-                    if (windows[index_window].init_type[2]) {
-                        CorePosition[2].emplace_back(Position(index_window, index_region, 0));
-                    }
-                }
-            }
+    }
+    }
+    if (region_energy_types[index_region] == 3 || region_energy_types[index_region] == 4) {
+    NonCorePosition[2].emplace_back(Position(index_window, index_region, 0));
+    if (windows[index_window].init_type[2]) {
+    CorePosition[2].emplace_back(Position(index_window, index_region, 0));
+    }
+    }
+    }
+    }
+    for (int i = 0; i < 3; ++i) {
+        for (Position &position: CorePosition[i]) {
+        position.cost = 0;
+        position.cost += manu_time[i] * (K + windows[position.window].cost_coeff);
+        }
+        std::sort(CorePosition[i].begin(), CorePosition[i].end());
         }
         for (Machine &machine: machines) {
-
-            int type = machine.type;
-            if (machine.is_core) {
-                machine.positions = CorePosition[type];
+        int type = machine.type;
+        if (machine.is_core) {
+        machine.positions = CorePosition[type];
 //                for (Position &position: CorePosition[type]) {
 //                    position.cost = 0;
 //                    position.cost += machine.cost[region_energy_types[position.region]] +
@@ -291,8 +297,8 @@ namespace MiuiIsTheBest {
 ////                        }
 //                    }
 //                }
-            } else {
-                machine.positions = NonCorePosition[type];
+        } else {
+        machine.positions = NonCorePosition[type];
 //                for (Position position: CorePosition[type]) {
 //                    unsigned int cost = 0;
 //                    cost += machine.cost[region_energy_types[position.region]];
@@ -306,7 +312,7 @@ namespace MiuiIsTheBest {
 //                        }
 //                    }
 //                }
-            }
+        }
         }
 //        for (Machine &current_machine: machines) {
 //            if (current_machine.is_core) {
@@ -325,12 +331,12 @@ namespace MiuiIsTheBest {
 //            }
 //            std::sort(machine.positions.begin(), machine.positions.end());
 //        }
-    }
+        }
 
-    void Solution::OutPut() {
+        void Solution::OutPut() {
         std::cout << num_machine << '\n';
         for (Machine &current_machine: machines) {
-            std::cout << current_machine.CurrentRegion() << ' ';
+        std::cout << current_machine.CurrentRegion() << ' ';
         }
         std::cout << '\n';
         std::cout << num_core_flow_line + 1 << '\n';
