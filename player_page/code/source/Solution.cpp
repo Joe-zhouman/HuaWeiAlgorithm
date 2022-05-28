@@ -272,34 +272,38 @@ namespace MiuiIsTheBest {
         for (Machine &machine: machines) {
             int type = machine.type;
             if (machine.is_core) {
-                for (Position position: CorePosition[type]) {
-                    unsigned int cost = 0;
-                    cost += machine.cost[region_energy_types[position.region]] +
-                            manu_time[type] * (K + windows[position.window].cost_coeff);
+                for (Position &position: CorePosition[type]) {
+                    position.cost = 0;
+                    position.cost += machine.cost[region_energy_types[position.region]] +
+                                     manu_time[type] * (K + windows[position.window].cost_coeff);
                     if (machine.positions.empty()) {
                         machine.positions.emplace_back(position);
                     } else {
-                        if (cost < machine.positions.front().cost) {
-                            machine.positions.emplace(machine.positions.begin(), position);
-                        } else {
-                            machine.positions.emplace_back(position);
-                        }
+                        machine.positions.emplace(
+                                std::lower_bound(machine.positions.begin(), machine.positions.end(), position),
+                                position);
+//                        if (cost < machine.positions.front().cost) {
+//                            machine.positions.emplace(machine.positions.begin(), position);
+//                        } else {
+//                            machine.positions.emplace_back(position);
+//                        }
                     }
                 }
             } else {
-                for (Position position: CorePosition[type]) {
-                    unsigned int cost = 0;
-                    cost += machine.cost[region_energy_types[position.region]];
-                    if (machine.positions.empty()) {
-                        machine.positions.emplace_back(position);
-                    } else {
-                        if (cost < machine.positions.front().cost) {
-                            machine.positions.emplace(machine.positions.begin(), position);
-                        } else {
-                            machine.positions.emplace_back(position);
-                        }
-                    }
-                }
+                machine.positions = NonCorePosition[type];
+//                for (Position position: CorePosition[type]) {
+//                    unsigned int cost = 0;
+//                    cost += machine.cost[region_energy_types[position.region]];
+//                    if (machine.positions.empty()) {
+//                        machine.positions.emplace_back(position);
+//                    } else {
+//                        if (cost < machine.positions.front().cost) {
+//                            machine.positions.emplace(machine.positions.begin(), position);
+//                        } else {
+//                            machine.positions.emplace_back(position);
+//                        }
+//                    }
+//                }
             }
         }
 //        for (Machine &current_machine: machines) {
