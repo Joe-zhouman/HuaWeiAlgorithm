@@ -285,7 +285,17 @@ namespace MiuiIsTheBest {
             temp[4] = 3;
             temp[5] = 4;
         }
-        for (int index_window = 0; index_window < num_windows; index_window++) {
+        std::vector<int> temp_window_index;
+        temp_window_index.emplace_back(0);
+        for (int index_window = 1; index_window < num_windows; index_window++) {
+            windows[index_window].cost = (K + windows[index_window].cost_coeff);
+            if (windows[index_window] < windows[temp_window_index.front()]) {
+                temp_window_index.emplace(temp_window_index.begin(), index_window);
+            } else {
+                temp_window_index.emplace_back(index_window);
+            }
+        }
+        for (int index_window: temp_window_index) {
             for (int index_region: factories[windows[index_window].factory]) {
                 if (region_energy_types[index_region] == temp[0] || region_energy_types[index_region] == temp[1]) {
                     NonCorePosition[0].emplace_back(Position(index_window, index_region, 0));

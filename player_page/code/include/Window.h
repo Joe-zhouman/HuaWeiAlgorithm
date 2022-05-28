@@ -13,6 +13,10 @@ namespace MiuiIsTheBest {
         int cost_coeff;//窗口费用系数
         bool init_type[3];//预处理支持类型
         unsigned int cost = 0;
+
+        bool operator<(const Window &p) const {
+            return cost < p.cost;
+        }
     };
 } // MiuiIsTheBest
 
