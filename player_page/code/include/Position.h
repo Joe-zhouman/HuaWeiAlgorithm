@@ -5,7 +5,7 @@
 #ifndef EMBEDDED_2022_POSITION_H
 #define EMBEDDED_2022_POSITION_H
 namespace MiuiIsTheBest {
-    struct Position {
+    struct Position : public __gnu_cxx::__normal_iterator {
         int window;
         int region;
         unsigned int cost;
