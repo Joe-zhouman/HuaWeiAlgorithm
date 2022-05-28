@@ -23,7 +23,7 @@ namespace MiuiIsTheBest {
         std::vector<bool> *connect_types;//同父节点的连接状态
         std::vector<int> *cycled_windows;//从每个父节点过来所用的回环窗口
         V_STATUS status = V_STATUS::UNDISCOVERED;//节点状态，拓扑排序时使用
-        int type;//仪器类型
+        int type = 0;//仪器类型
         bool is_core = false;//是否位于核心生产线
         int NumParents() { return static_cast<int>(parents->size()); }
 
