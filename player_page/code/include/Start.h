@@ -8,14 +8,14 @@
 
 class Start {
 public:
-    short index;
-    short depth;
+    int index;
+    int depth;
 
     bool operator<(const Start &s) const {
         return depth < s.depth;
     }
 
-    explicit Start(short index = 0, short depth = 0) :
+    explicit Start(int index = 0, int depth = 0) :
             index(index), depth(depth) {}
 };
 

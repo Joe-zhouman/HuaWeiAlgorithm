@@ -8,9 +8,9 @@
 namespace MiuiIsTheBest {
 
     struct Window {
-        short factory;//窗口的车间
-        short rest_cycle_times;//剩余的环回次数
-        short cost_coeff;//窗口费用系数
+        int factory;//窗口的车间
+        int rest_cycle_times;//剩余的环回次数
+        int cost_coeff;//窗口费用系数
         bool init_type[3];//预处理支持类型
     };
 } // MiuiIsTheBest

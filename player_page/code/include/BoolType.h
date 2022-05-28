@@ -25,7 +25,7 @@ namespace MiuiIsTheBest {
             third_bit = false;
         }
 
-        explicit BoolType(short n) {
+        explicit BoolType(int n) {
             first_bit = n & 0b1;
             second_bit = (n & 0b10) >> 1;
             third_bit = (n & 0b100) >> 2;

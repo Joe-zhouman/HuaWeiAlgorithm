@@ -10,10 +10,10 @@
 //#define FULL_OUTPUT
 namespace MiuiIsTheBest {
 
-    bool Solution::IsSuccessor(Machine *current_machine, short parent_index) {
+    bool Solution::IsSuccessor(Machine *current_machine, int parent_index) {
 //        assert(current_machine->parents != nullptr);
-        short index_parent = machines[current_machine->parents->at(parent_index)].CurrentWindow();
-        short index_current = current_machine->CurrentWindow();
+        int index_parent = machines[current_machine->parents->at(parent_index)].CurrentWindow();
+        int index_current = current_machine->CurrentWindow();
         if (index_parent < index_current) return true;
         if (index_parent > index_current && index_parent < num_cycle_windows &&
             windows[num_cycle_windows - 1].rest_cycle_times > 0) {
@@ -31,15 +31,17 @@ namespace MiuiIsTheBest {
         return false;
     }
 
-    Machine *Solution::GetCurrentMachine(short index_flow_line) {
+    Machine *Solution::GetCurrentMachine(int index_flow_line) {
         return &machines[flow_lines[index_flow_line].current_machine];
     }
-    Machine *Solution::GetPreviousMachine(short index_flow_line) {
+
+    Machine *Solution::GetPreviousMachine(int index_flow_line) {
         return &machines[flow_lines[index_flow_line].previous_machine];
     }
+
     bool Solution::GetSolution() {
         for (Start &start: starts) {
-            short clock = 0;
+            int clock = 0;
             if (!TSort(start.index, &machine_index, clock)) {
                 return false;
             }
@@ -47,7 +49,7 @@ namespace MiuiIsTheBest {
             machine_index.clear();
             Reset();
         }
-        short clock = 0;
+        int clock = 0;
         std::sort(starts.begin(), starts.end());
         for (Start start: starts) {
             if (!TSort(start.index, &machine_index, clock)) {
@@ -56,7 +58,7 @@ namespace MiuiIsTheBest {
         }
         if (machine_index.size() < 1)return false;
         index_current_step = machine_index.size() - 1;
-        short index_current_machine;
+        int index_current_machine;
         Machine *current_machine;
 
         while (index_current_step >= 0 && index_current_step < num_machine) {
@@ -77,7 +79,7 @@ namespace MiuiIsTheBest {
             while (!current_machine->OutOfPosition()) {
                 if (current_machine->parents != nullptr) {
                     bool succesor = false;
-                    for (short i = 0; i < current_machine->NumParents(); i++) {
+                    for (int i = 0; i < current_machine->NumParents(); i++) {
                         succesor = IsSuccessor(current_machine, i);
                         if (!succesor) {
                             current_machine->RegainCycleTimes(windows);
@@ -105,11 +107,11 @@ namespace MiuiIsTheBest {
 //#ifdef DEBUG
 //                    std::cout << "Machine " << machine_index[index_current_step] << " is out of position" << std::endl;
 //#endif
-//                    short back_tracking_position = 0;
-                    short back_tracking_step = 0;
-                    std::vector<short> *back_tracking_machines = current_machine->parents;
-                    for (short &index: *back_tracking_machines) {
-                        short position =
+//                    int back_tracking_position = 0;
+                    int back_tracking_step = 0;
+                    std::vector<int> *back_tracking_machines = current_machine->parents;
+                    for (int &index: *back_tracking_machines) {
+                        int position =
                                 std::find(machine_index.begin(), machine_index.end(), index) - machine_index.begin();
                         if (position > back_tracking_step) back_tracking_step = position;
                     }
@@ -132,24 +134,24 @@ namespace MiuiIsTheBest {
         std::cin >> manu_time[0] >> manu_time[1] >> manu_time[2] >> manu_time[3] >> manu_time[4];
         std::cin >> num_factories;
         for (int i = 0; i < num_factories; ++i) {
-            std::vector<short> temp_factory;
+            std::vector<int> temp_factory;
             factories.emplace_back(temp_factory);
         }
         std::cin >> num_regions;
-        short factory, energy;
-        for (short i = 0; i < num_regions; ++i) {
+        int factory, energy;
+        for (int i = 0; i < num_regions; ++i) {
             std::cin >> factory >> energy;
             factories[factory].emplace_back(i);
             region_energy_types.emplace_back(BoolType(energy));
         }
-        short max_cycle_times;
+        int max_cycle_times;
         std::cin >> max_cycle_times;
         max_cycle_times++;
         std::cin >> num_cycle_windows;
         std::cin >> num_windows;
         bool self_cycle;
-        short factory_index;
-        for (short i = 0; i < num_windows; ++i) {
+        int factory_index;
+        for (int i = 0; i < num_windows; ++i) {
             Window temp_window;
             std::cin >> self_cycle >> factory_index >> temp_window.cost_coeff >> temp_window.init_type[0]
                      >> temp_window.init_type[1] >> temp_window.init_type[2];
@@ -160,11 +162,11 @@ namespace MiuiIsTheBest {
             } else {
                 temp_window.rest_cycle_times = self_cycle ? max_cycle_times : 0;
             }
-            windows.push_back(temp_window);
+            windows.emplace_back(temp_window);
         }
         std::cin >> num_machine;
-        for (short i = 0; i < num_machine; ++i) {
-            short machine_type;
+        for (int i = 0; i < num_machine; ++i) {
+            int machine_type;
             std::cin >> machine_type;
             machines.emplace_back(Machine(machine_type));
             for (int j = 0; j < 5; j++) {
@@ -172,19 +174,19 @@ namespace MiuiIsTheBest {
             }
         }
         std::cin >> num_flow_line;
-        for (short i = 0; i < num_flow_line; ++i) {
+        for (int i = 0; i < num_flow_line; ++i) {
             FlowLine temp_flow_line;
             std::cin >> temp_flow_line.type >> temp_flow_line.previous_machine >> temp_flow_line.current_machine;
             flow_lines.push_back(temp_flow_line);
         }
         std::cin >> num_core_flow_line;
-        short index_core_flow_line;
+        int index_core_flow_line;
         std::cin >> index_core_flow_line;
         flow_lines[index_core_flow_line].is_core = true;
         machines[flow_lines[index_core_flow_line].current_machine].is_core = true;
         machines[flow_lines[index_core_flow_line].previous_machine].is_core = true;
 
-        for (short i = 1; i < num_core_flow_line; ++i) {
+        for (int i = 1; i < num_core_flow_line; ++i) {
             std::cin >> index_core_flow_line;
             flow_lines[index_core_flow_line].is_core = true;
             machines[flow_lines[index_core_flow_line].current_machine].is_core = true;
@@ -192,13 +194,13 @@ namespace MiuiIsTheBest {
         MachinePositionInit();
     }
 
-    bool Solution::TSort(short index_machine, std::vector<short> *S, short &clock) {
+    bool Solution::TSort(int index_machine, std::vector<int> *S, int &clock) {
         Machine *current_machine = &machines[index_machine];
         current_machine->depth = ++clock;
         current_machine->status = V_STATUS::DISCOVERED;
         if (current_machine->children != nullptr) {
-            for (short u = 0; u < current_machine->children->size(); u++) {
-                short index_current_child = current_machine->children->at(u).index;
+            for (int u = 0; u < current_machine->children->size(); u++) {
+                int index_current_child = current_machine->children->at(u).index;
                 Machine *current_child = &machines[index_current_child];
                 switch (current_child->status) {
                     case V_STATUS::UNDISCOVERED:
@@ -223,7 +225,7 @@ namespace MiuiIsTheBest {
             machines[current_flow_line.current_machine].parents->emplace_back(current_flow_line.previous_machine);
             machines[current_flow_line.current_machine].cycled_windows->emplace_back(-1);
         }
-        for (short i = 0; i < num_machine; i++) {
+        for (int i = 0; i < num_machine; i++) {
             if (machines[i].parents->size() == 0) {
                 machines[i].parents = nullptr;
                 starts.emplace_back(Start(i));
@@ -234,7 +236,7 @@ namespace MiuiIsTheBest {
             if (machine.children == nullptr)continue;
             if (machine.children->size() > 1) {
                 for (Start &start: *machine.children) {
-                    short clock = 0;
+                    int clock = 0;
                     if (!TSort(start.index, &machine_index, clock)) {
                         return false;
                     }
@@ -250,12 +252,12 @@ namespace MiuiIsTheBest {
 
     void Solution::MachinePositionInit() {
         for (Machine &current_machine: machines) {
-            for (short index_window = 0; index_window < num_windows; index_window++) {
+            for (int index_window = 0; index_window < num_windows; index_window++) {
                 Window *current_window = &windows[index_window];
                 int current_machine_type = current_machine.type.ToInt();
                 if (!current_machine.is_core ||
                     (current_machine.is_core && current_window->init_type[current_machine_type])) {
-                    for (short index_region: factories[current_window->factory]) {
+                    for (int index_region: factories[current_window->factory]) {
                         if (current_machine_type == 0) {
                             if (region_energy_types[index_region] == BoolType(0) ||
                                 region_energy_types[index_region] == BoolType(1)) {
@@ -296,7 +298,7 @@ namespace MiuiIsTheBest {
         }
         std::cout << '\n';
         std::cout << num_core_flow_line + 1 << '\n';
-        short i = 0;
+        int i = 0;
         for (; i < num_flow_line; ++i) {
             if (flow_lines[i].is_core) {
                 Machine *previous_machine = GetPreviousMachine(i);

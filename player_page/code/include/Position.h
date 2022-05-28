@@ -6,13 +6,15 @@
 #define EMBEDDED_2022_POSITION_H
 namespace MiuiIsTheBest {
     struct Position {
-        short window;
-        short region;
+        int window;
+        int region;
         unsigned int cost;
+
         bool operator<(const Position &p) const {
             return cost < p.cost;
         }
-        Position(short window, short region, unsigned int cost) :
+
+        Position(int window, int region, unsigned int cost) :
                 window(window), region(region), cost(cost) {}
     };
 }

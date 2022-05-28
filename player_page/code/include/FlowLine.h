@@ -9,8 +9,8 @@ namespace MiuiIsTheBest {
 
     struct FlowLine {
         bool type;//0,1
-        short previous_machine;
-        short current_machine;
+        int previous_machine;
+        int current_machine;
         bool is_core;
     };
 
