@@ -287,7 +287,7 @@ namespace MiuiIsTheBest {
                     }
                 }
             } else {
-                for (Position &position: CorePosition[type]) {
+                for (Position position: CorePosition[type]) {
                     unsigned int cost = 0;
                     cost += machine.cost[region_energy_types[position.region]];
                     if (machine.positions.empty()) {
