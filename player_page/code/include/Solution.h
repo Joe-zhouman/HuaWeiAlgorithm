@@ -23,6 +23,7 @@ namespace MiuiIsTheBest {
         std::vector<Machine> machines;//所有机器的集合
         std::vector<Start> starts;
         std::vector<int> machine_index;
+        std::vector<int> core_flow_lines;
         int num_flow_line = 0;
         int num_core_flow_line = 0;//流水线核心产线边数
         //其他变量

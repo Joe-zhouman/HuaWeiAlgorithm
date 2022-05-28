@@ -181,15 +181,12 @@ namespace MiuiIsTheBest {
         }
         std::cin >> num_core_flow_line;
         int index_core_flow_line;
-        std::cin >> index_core_flow_line;
-        flow_lines[index_core_flow_line].is_core = true;
-        machines[flow_lines[index_core_flow_line].current_machine].is_core = true;
-        machines[flow_lines[index_core_flow_line].previous_machine].is_core = true;
-
-        for (int i = 1; i < num_core_flow_line; ++i) {
+        for (int i = 0; i < num_core_flow_line; ++i) {
             std::cin >> index_core_flow_line;
+            core_flow_lines.emplace_back(index_core_flow_line);
             flow_lines[index_core_flow_line].is_core = true;
             machines[flow_lines[index_core_flow_line].current_machine].is_core = true;
+            machines[flow_lines[index_core_flow_line].previous_machine].is_core = true;
         }
         MachinePositionInit();
     }
@@ -298,22 +295,23 @@ namespace MiuiIsTheBest {
         }
         std::cout << '\n';
         std::cout << num_core_flow_line + 1 << '\n';
-        int i = 0;
-        for (; i < num_flow_line; ++i) {
-            if (flow_lines[i].is_core) {
-                Machine *previous_machine = GetPreviousMachine(i);
-                Machine *current_machine = GetCurrentMachine(i);
-                std::cout << previous_machine->CurrentWindow() << ' '
-                          << current_machine->CurrentWindow() << ' ';
-                break;
+        int start_machine;
+        for (Start start: starts) {
+            if (machines[start.index].is_core) {
+                start_machine = start.index;
             }
         }
-        for (++i; i < num_flow_line; ++i) {
-            if (flow_lines[i].is_core) {
-                std::cout << GetCurrentMachine(i)->CurrentWindow() << ' ';
+        Machine *current_machine = &machines[start_machine];
+        while (true) {
+            std::cout << current_machine->CurrentWindow() << " ";
+            if (current_machine->children == nullptr)break;
+            for (Start start: *current_machine->children) {
+                if (machines[start.index].is_core) {
+                    current_machine = &machines[start.index];
+                }
             }
         }
-        std::cout << '\n';
+
 //#ifdef FULL_OUTPUT
 //        for (Machine &current_machine: machines) {
 //            std::cout << current_machine.CurrentWindow() << ' ';
