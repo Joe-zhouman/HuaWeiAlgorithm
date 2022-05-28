@@ -40,7 +40,6 @@ namespace MiuiIsTheBest {
             machine_index.clear();
             Reset();
         }
-        int clock = 0;
         std::sort(starts.begin(), starts.end());
         for (Start start: starts) {
             if (!TSort(start.index, &machine_index)) {
@@ -236,12 +235,7 @@ namespace MiuiIsTheBest {
     }
 
     void Solution::MachinePositionInit() {
-        std::vector<Position> CorePosition[3];
-//        std::vector<Position> CorePosition2;
-//        std::vector<Position> CorePosition3;
-        std::vector<Position> NonCorePosition[3];
-//        std::vector<Position> NonCorePosition2;
-//        std::vector<Position> NonCorePosition3;
+
         for (int index_window = 0; index_window < num_windows; index_window++) {
             for (int index_region: factories[windows[index_window].factory]) {
                 if (region_energy_types[index_region] == 0 || region_energy_types[index_region] == 1) {
@@ -266,9 +260,9 @@ namespace MiuiIsTheBest {
         }
         for (Machine &current_machine: machines) {
             if (current_machine.is_core) {
-                current_machine.positions = &CorePosition[current_machine.type];
+                current_machine.positions = CorePosition[current_machine.type];
             } else {
-                current_machine.positions = &NonCorePosition[current_machine.type];
+                current_machine.positions = NonCorePosition[current_machine.type];
             }
         }
 //        for (Machine &machine: machines) {

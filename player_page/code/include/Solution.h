@@ -24,6 +24,8 @@ namespace MiuiIsTheBest {
         std::vector<Start> starts;
         std::vector<int> machine_index;
         std::vector<int> core_flow_lines;
+        std::vector<Position> CorePosition[3];
+        std::vector<Position> NonCorePosition[3];
         int num_flow_line = 0;
         int num_core_flow_line = 0;//流水线核心产线边数
         //其他变量

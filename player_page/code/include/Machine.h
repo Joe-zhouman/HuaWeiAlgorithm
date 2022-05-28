@@ -17,7 +17,7 @@ namespace MiuiIsTheBest {
         int current_position = 0;//当前所在的许用位置
         int depth = 0;
         unsigned int cost[5];//使用不同能源的费用
-        std::vector<Position> *positions;//所有的容许位置
+        std::vector<Position> positions;//所有的容许位置
         std::vector<int> *parents;//父节点
         std::vector<Start> *children;//子节点
         std::vector<bool> *connect_types;//同父节点的连接状态
@@ -36,14 +36,13 @@ namespace MiuiIsTheBest {
             }
         }
 
-        int CurrentWindow() { return positions->at(current_position).window; }
+        int CurrentWindow() { return positions.at(current_position).window; }
 
-        int CurrentRegion() { return positions->at(current_position).region; }
+        int CurrentRegion() { return positions.at(current_position).region; }
 
-        bool OutOfPosition() { return current_position >= positions->size(); }//是否超出所在位置
+        bool OutOfPosition() { return current_position >= positions.size(); }//是否超出所在位置
 
         ~Machine() {
-            delete positions;
             delete parents;
             delete children;
             delete connect_types;
@@ -56,11 +55,10 @@ namespace MiuiIsTheBest {
             status = m.status;
             type = m.type;
             is_core = m.is_core;
+            positions = m.positions;
             for (int i = 0; i < 5; ++i) {
                 cost[i] = m.cost[i];
             }
-
-            positions = new std::vector<Position>;
             parents = new std::vector<int>;
             children = new std::vector<Start>;
             connect_types = new std::vector<bool>;
@@ -69,8 +67,6 @@ namespace MiuiIsTheBest {
 
         explicit Machine(int machine_type_number)
                 : type(machine_type_number) {
-
-            positions = new std::vector<Position>;
             parents = new std::vector<int>;
             children = new std::vector<Start>;
             connect_types = new std::vector<bool>;
