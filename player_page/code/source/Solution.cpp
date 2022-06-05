@@ -4,6 +4,7 @@
 #include "iostream"
 #include "Solution.h"
 #include "algorithm"
+#include "ordered_list.h"
 //#include "assert.h"
 
 //#define DEBUG
@@ -31,7 +32,7 @@ namespace MiuiIsTheBest {
         return false;
     }
 
-    bool Solution::GetSolution() {
+    bool Solution::TSortBfs() {
         for (Start &start: starts) {
             if (!TSort(start.index, &machine_index)) {
                 return false;
@@ -46,6 +47,10 @@ namespace MiuiIsTheBest {
                 return false;
             }
         }
+        return true;
+    }
+
+    bool Solution::GetSolution() {
         for (int i = 0; i < machine_index.size(); ++i) {
             machines[machine_index[i]].depth = i;
         }
@@ -60,15 +65,6 @@ namespace MiuiIsTheBest {
 //#endif
             index_current_machine = machine_index[index_current_step];
             current_machine = &machines[index_current_machine];
-//            if (current_machine->parents == nullptr) {
-//                current_machine->current_position++;
-//                if (current_machine->OutOfPosition()) {
-//                    return false;
-//                }
-//                index_current_step--;
-//                index_current_machine = machine_index[index_current_step];
-//                current_machine = &machines[index_current_machine];
-//            }
             std::vector<int> back_tracking;
             std::vector<int> *back_tracking_machines = &back_tracking;
             while (!current_machine->OutOfPosition()) {
@@ -110,7 +106,6 @@ namespace MiuiIsTheBest {
 //#ifdef DEBUG
 //                    std::cout << "Machine " << machine_index[index_current_step] << " is out of position" << std::endl;
 //#endif
-//                    int back_tracking_position = 0;
                     int back_tracking_step = 0;
 
                     for (int &index: *back_tracking_machines) {
@@ -153,19 +148,15 @@ namespace MiuiIsTheBest {
         std::cin >> num_cycle_windows;
         std::cin >> num_windows;
         bool self_cycle;
-        int factory_index;
         for (int i = 0; i < num_windows; ++i) {
-            Window temp_window;
-            std::cin >> self_cycle >> factory_index >> temp_window.cost_coeff >> temp_window.init_type[0]
-                     >> temp_window.init_type[1] >> temp_window.init_type[2];
-
-            temp_window.factory = factory_index;
+            windows.emplace_back(Window());
+            std::cin >> self_cycle >> windows.back().factory >> windows.back().cost_coeff >> windows.back().init_type[0]
+                     >> windows.back().init_type[1] >> windows.back().init_type[2];
             if (i == num_cycle_windows - 1) {
-                temp_window.rest_cycle_times = max_cycle_times;
+                windows.back().rest_cycle_times = max_cycle_times;
             } else {
-                temp_window.rest_cycle_times = self_cycle ? max_cycle_times : 0;
+                windows.back().rest_cycle_times = self_cycle ? max_cycle_times : 0;
             }
-            windows.emplace_back(temp_window);
         }
         std::cin >> num_machine;
         for (int i = 0; i < num_machine; ++i) {
@@ -183,14 +174,22 @@ namespace MiuiIsTheBest {
             flow_lines.push_back(temp_flow_line);
         }
         std::cin >> num_core_flow_line;
-        int index_core_flow_line;
+        int core_index;
         for (int i = 0; i < num_core_flow_line; ++i) {
-            std::cin >> index_core_flow_line;
-            core_flow_lines.emplace_back(index_core_flow_line);
-            machines[flow_lines[index_core_flow_line].current_machine].is_core = true;
-            machines[flow_lines[index_core_flow_line].previous_machine].is_core = true;
+            std::cin >> core_index;
+            int previous_machine = flow_lines[core_index].previous_machine;
+            int current_machine = flow_lines[core_index].current_machine;
+            machines[flow_lines[core_index].current_machine].is_core = true;
+            machines[flow_lines[core_index].previous_machine].is_core = true;
+            if (core_line_machines.empty()) {
+                core_line_machines.emplace_front(current_machine);
+                core_line_machines.emplace_front(previous_machine);
+            } else if (current_machine == core_line_machines.front()) {
+                core_line_machines.emplace_front(previous_machine);
+            } else {
+                core_line_machines.emplace_back(current_machine);
+            }
         }
-        MachinePositionInit();
     }
 
     bool Solution::TSort(int index_machine, std::vector<int> *S) {
@@ -255,7 +254,7 @@ namespace MiuiIsTheBest {
             if (machine.type == 0) {
                 total_cost[0] += machine.cost[0];
                 total_cost[1] += machine.cost[1];
-            } else if (machine.type == 0) {
+            } else if (machine.type == 1) {
                 total_cost[2] += machine.cost[0];
                 total_cost[3] += machine.cost[2];
             } else {
@@ -285,17 +284,12 @@ namespace MiuiIsTheBest {
             temp[4] = 3;
             temp[5] = 4;
         }
-        std::vector<int> temp_window_index;
-        temp_window_index.emplace_back(0);
-        for (int index_window = 1; index_window < num_windows; index_window++) {
-            windows[index_window].cost = (K + windows[index_window].cost_coeff);
-            if (windows[index_window] < windows[temp_window_index.front()]) {
-                temp_window_index.emplace(temp_window_index.begin(), index_window);
-            } else {
-                temp_window_index.emplace_back(index_window);
-            }
+        ordered_list<Window> temp_window_index;
+        for (Window &window: windows) {
+            window.cost = (K + window.cost_coeff);
+            temp_window_index.insert(window);
         }
-        for (int index_window: temp_window_index) {
+        for (int index_window = 0; index_window < num_windows; index_window++) {
             for (int index_region: factories[windows[index_window].factory]) {
                 if (region_energy_types[index_region] == temp[0] || region_energy_types[index_region] == temp[1]) {
                     NonCorePosition[0].emplace_back(Position(index_window, index_region, 0));
@@ -387,19 +381,6 @@ namespace MiuiIsTheBest {
         }
         std::cout << '\n';
         std::cout << num_core_flow_line + 1 << '\n';
-        std::vector<int> core_line_machines;
-        for (int core_index: core_flow_lines) {
-            int previous_machine = flow_lines[core_index].previous_machine;
-            int current_machine = flow_lines[core_index].current_machine;
-            if (core_line_machines.empty()) {
-                core_line_machines.emplace_back(previous_machine);
-                core_line_machines.emplace_back(current_machine);
-            } else if (previous_machine == core_line_machines.back()) {
-                core_line_machines.emplace_back(current_machine);
-            } else if (current_machine == core_line_machines.front()) {
-                core_line_machines.emplace(core_line_machines.begin(), previous_machine);
-            }
-        }
         for (int index: core_line_machines) {
             std::cout << machines[index].CurrentWindow() << " ";
         }
