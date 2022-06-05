@@ -246,64 +246,22 @@ namespace MiuiIsTheBest {
         return true;
     }
 
-    void Solution::MachinePositionInit() {
-        for (int i = 0; i < 6; ++i) {
-            total_cost[i] = 0;
-        }
-        for (Machine machine: machines) {
-            if (machine.type == 0) {
-                total_cost[0] += machine.cost[0];
-                total_cost[1] += machine.cost[1];
-            } else if (machine.type == 1) {
-                total_cost[2] += machine.cost[0];
-                total_cost[3] += machine.cost[2];
-            } else {
-                total_cost[4] += machine.cost[3];
-                total_cost[5] += machine.cost[4];
-            }
-        }
-        int temp[6];
-        if (total_cost[0] > total_cost[1]) {
-            temp[0] = 1;
-            temp[1] = 0;
-        } else {
-            temp[0] = 0;
-            temp[1] = 1;
-        }
-        if (total_cost[2] > total_cost[3]) {
-            temp[2] = 2;
-            temp[3] = 0;
-        } else {
-            temp[2] = 0;
-            temp[3] = 2;
-        }
-        if (total_cost[4] > total_cost[5]) {
-            temp[4] = 4;
-            temp[5] = 3;
-        } else {
-            temp[4] = 3;
-            temp[5] = 4;
-        }
-        ordered_list<Window> temp_window_index;
-        for (Window &window: windows) {
-            window.cost = (K + window.cost_coeff);
-            temp_window_index.insert(window);
-        }
+    void Solution::MachinePositionInitWithoutSort() {
         for (int index_window = 0; index_window < num_windows; index_window++) {
             for (int index_region: factories[windows[index_window].factory]) {
-                if (region_energy_types[index_region] == temp[0] || region_energy_types[index_region] == temp[1]) {
+                if (region_energy_types[index_region] == 0 || region_energy_types[index_region] == 1) {
                     NonCorePosition[0].emplace_back(Position(index_window, index_region, 0));
                     if (windows[index_window].init_type[0]) {
                         CorePosition[0].emplace_back(Position(index_window, index_region, 0));
                     }
                 }
-                if (region_energy_types[index_region] == temp[2] || region_energy_types[index_region] == temp[3]) {
+                if (region_energy_types[index_region] == 0 || region_energy_types[index_region] == 2) {
                     NonCorePosition[1].emplace_back(Position(index_window, index_region, 0));
                     if (windows[index_window].init_type[1]) {
                         CorePosition[1].emplace_back(Position(index_window, index_region, 0));
                     }
                 }
-                if (region_energy_types[index_region] == temp[4] || region_energy_types[index_region] == temp[5]) {
+                if (region_energy_types[index_region] == 3 || region_energy_types[index_region] == 4) {
                     NonCorePosition[2].emplace_back(Position(index_window, index_region, 0));
                     if (windows[index_window].init_type[2]) {
                         CorePosition[2].emplace_back(Position(index_window, index_region, 0));
@@ -311,67 +269,14 @@ namespace MiuiIsTheBest {
                 }
             }
         }
-//        for (int i = 0; i < 3; ++i) {
-//            for (Position &position: CorePosition[i]) {
-//                position.cost = manu_time[i] * (K + windows[position.window].cost_coeff);
-//            }
-//            std::sort(CorePosition[i].begin(), CorePosition[i].end());
-//        }
         for (Machine &machine: machines) {
             int type = machine.type;
             if (machine.is_core) {
                 machine.positions = CorePosition[type];
-//                for (Position &position: CorePosition[type]) {
-//                    position.cost = 0;
-//                    position.cost += machine.cost[region_energy_types[position.region]] +
-//                                     manu_time[type] * (K + windows[position.window].cost_coeff);
-//                    if (machine.positions.empty()) {
-//                        machine.positions.emplace_back(position);
-//                    } else {
-//                        machine.positions.emplace(
-//                                std::lower_bound(machine.positions.begin(), machine.positions.end(), position),
-//                                position);
-////                        if (cost < machine.positions.front().cost) {
-////                            machine.positions.emplace(machine.positions.begin(), position);
-////                        } else {
-////                            machine.positions.emplace_back(position);
-////                        }
-//                    }
-//                }
             } else {
                 machine.positions = NonCorePosition[type];
-//                for (Position position: CorePosition[type]) {
-//                    unsigned int cost = 0;
-//                    cost += machine.cost[region_energy_types[position.region]];
-//                    if (machine.positions.empty()) {
-//                        machine.positions.emplace_back(position);
-//                    } else {
-//                        if (cost < machine.positions.front().cost) {
-//                            machine.positions.emplace(machine.positions.begin(), position);
-//                        } else {
-//                            machine.positions.emplace_back(position);
-//                        }
-//                    }
-//                }
             }
         }
-//        for (Machine &current_machine: machines) {
-//            if (current_machine.is_core) {
-//                current_machine.positions = CorePosition[current_machine.type];
-//            } else {
-//                current_machine.positions = NonCorePosition[current_machine.type];
-//            }
-//        }
-//        for (Machine &machine: machines) {
-//            if (!machine.is_core)continue;
-//            for (int i = 0; i < machine.positions.size(); ++i) {
-//                unsigned int cost = 0;
-//                cost += machine.cost[region_energy_types[machine.positions[i].region]];
-//                cost += manu_time[machine.type] * (K + windows[machine.positions.at(i).window].cost_coeff);
-//                machine.positions.at(i).cost = cost;
-//            }
-//            std::sort(machine.positions.begin(), machine.positions.end());
-//        }
     }
 
     void Solution::OutPut() {

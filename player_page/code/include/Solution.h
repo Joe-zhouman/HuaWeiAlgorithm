@@ -52,7 +52,7 @@ namespace MiuiIsTheBest {
     public:
         bool GetSolution();
 
-        void MachinePositionInit();
+        void MachinePositionInitWithoutSort();
 
         bool TSortBfs();
 
