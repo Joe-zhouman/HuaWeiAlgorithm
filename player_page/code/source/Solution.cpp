@@ -121,6 +121,7 @@ namespace MiuiIsTheBest {
                     }
                     current_machine->current_position++;
                     current_machine->RegainCycleTimes(windows);
+                    back_tracking_machines = current_machine->parents;
                 }
             }
         }
