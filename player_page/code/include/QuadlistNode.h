@@ -37,6 +37,5 @@ namespace simple_dsa {
         if (b)b->above_ = x;//设置垂直逆向链接
         return x;//返回新节点的位置
     }
-
 } // simple_dsa
 #endif //EMBEDDED_2022_QUADLISTNODE_H

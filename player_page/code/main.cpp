@@ -6,7 +6,7 @@ using namespace MiuiIsTheBest;
 
 int main(int argc, char *argv[]) {
     Solution case_solution;
-    case_solution.MachinePositionInitWithoutSort();
+    case_solution.MachinePositionInitWithSkiplist();
     case_solution.MachineGraphInit();
     case_solution.TSortBfs();
     case_solution.GetSolution();

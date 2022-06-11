@@ -4,7 +4,7 @@
 #include "iostream"
 #include "Solution.h"
 #include "algorithm"
-#include "ordered_list.h"
+//#include "Skiplist.h"
 //#include "assert.h"
 
 //#define DEBUG
@@ -60,9 +60,9 @@ namespace MiuiIsTheBest {
         Machine *current_machine;
 
         while (index_current_step >= 0 && index_current_step < num_machine) {
-//#ifdef DEBUG
-//            std::cout << "Find Region for machine " << machine_index[index_current_step] << std::endl;
-//#endif
+#ifdef DEBUG
+            std::cout << "Find Region for machine " << machine_index[index_current_step] << std::endl;
+#endif
             index_current_machine = machine_index[index_current_step];
             current_machine = &machines[index_current_machine];
             std::vector<int> back_tracking;
@@ -81,15 +81,15 @@ namespace MiuiIsTheBest {
                     }
                     if (!all_ok) {
                         current_machine->RegainCycleTimes(windows);
-                        current_machine->current_position++;
+                        current_machine->NextPosition();
                         continue;
                     }
                     if (succesor) {
-//#ifdef DEBUG
-//                        std::cout << "Set window " << current_machine->CurrentWindow()
-//                                  << " and region " << current_machine->CurrentRegion() << " for machine "
-//                                  << machine_index[index_current_step] << std::endl;
-//#endif
+#ifdef DEBUG
+                        std::cout << "Set window " << current_machine->CurrentWindow()
+                                  << " and region " << current_machine->CurrentRegion() << " for machine "
+                                  << machine_index[index_current_step] << std::endl;
+#endif
                         break;
                     }
                 } else {
@@ -103,9 +103,9 @@ namespace MiuiIsTheBest {
                     if (current_machine->parents == nullptr) {
                         return false;
                     }
-//#ifdef DEBUG
-//                    std::cout << "Machine " << machine_index[index_current_step] << " is out of position" << std::endl;
-//#endif
+#ifdef DEBUG
+                    std::cout << "Machine " << machine_index[index_current_step] << " is out of position" << std::endl;
+#endif
                     int back_tracking_step = 0;
 
                     for (int &index: *back_tracking_machines) {
@@ -114,12 +114,12 @@ namespace MiuiIsTheBest {
                     }
                     while (index_current_step < back_tracking_step) {
                         current_machine->RegainCycleTimes(windows);
-                        current_machine->current_position = 0;
+                        current_machine->ResetPosition();
                         index_current_step++;
                         index_current_machine = machine_index[index_current_step];
                         current_machine = &machines[index_current_machine];
                     }
-                    current_machine->current_position++;
+                    current_machine->NextPosition();
                     current_machine->RegainCycleTimes(windows);
                     back_tracking_machines = current_machine->parents;
                 }
@@ -143,7 +143,6 @@ namespace MiuiIsTheBest {
             factories[factory].emplace_back(i);
             region_energy_types.emplace_back(energy);
         }
-        int max_cycle_times;
         std::cin >> max_cycle_times;
         max_cycle_times++;
         std::cin >> num_cycle_windows;
@@ -230,56 +229,48 @@ namespace MiuiIsTheBest {
             }
             if (machines[i].children->size() == 0)machines[i].children = nullptr;
         }
-//        for (Machine &machine: machines) {
-//            if (machine.children == nullptr)continue;
-//            if (machine.children->size() > 1) {
-//                for (Start &start: *machine.children) {
-//                    if (!TSort(start.index, &machine_index)) {
-//                        return false;
-//                    }
-//                    start.depth = machine_index.size();
-//                    std::sort(machine.children->begin(), machine.children->end());
-//                    machine_index.clear();
-//                    Reset();
-//                }
-//            }
-//        }
         return true;
     }
-
-    void Solution::MachinePositionInitWithoutSort() {
-        for (int index_window = 0; index_window < num_windows; index_window++) {
-            for (int index_region: factories[windows[index_window].factory]) {
-                if (region_energy_types[index_region] == 0 || region_energy_types[index_region] == 1) {
-                    NonCorePosition[0].emplace_back(Position(index_window, index_region, 0));
-                    if (windows[index_window].init_type[0]) {
-                        CorePosition[0].emplace_back(Position(index_window, index_region, 0));
+    void Solution::MachinePositionInitWithSkiplist() {
+        for(Machine& machine:machines){
+            for (int i = 0;i<num_windows;i++){
+                for(int j = factories[windows[i].factory].front();j<=factories[windows[i].factory].back();j++){
+                    int energy_type = region_energy_types[j];
+                    unsigned int cost = 0;
+                    bool valid = false;
+                    switch (machine.type) {
+                        case 0:
+                            if(energy_type==0||energy_type==1){
+                                valid = true;
+                            }
+                            break;
+                        case 1:
+                            if(energy_type==0||energy_type==2){
+                                valid = true;
+                            }
+                            break;
+                        case 2:
+                            if(energy_type==3||energy_type==4){
+                                valid = true;
+                            }
+                            break;
+                        default:
+                            exit(-1);
                     }
-                }
-                if (region_energy_types[index_region] == 0 || region_energy_types[index_region] == 2) {
-                    NonCorePosition[1].emplace_back(Position(index_window, index_region, 0));
-                    if (windows[index_window].init_type[1]) {
-                        CorePosition[1].emplace_back(Position(index_window, index_region, 0));
+                    if(!valid)continue;
+                    if(!machine.is_core){
+                        cost+=machine.cost[energy_type];
+                    }else if(windows[i].init_type[machine.type]){
+                        cost+=manu_time[energy_type]*(K*max_cycle_times+windows[i].cost_coeff);
+                    }else{
+                        continue;
                     }
-                }
-                if (region_energy_types[index_region] == 3 || region_energy_types[index_region] == 4) {
-                    NonCorePosition[2].emplace_back(Position(index_window, index_region, 0));
-                    if (windows[index_window].init_type[2]) {
-                        CorePosition[2].emplace_back(Position(index_window, index_region, 0));
-                    }
+                    machine.positions->Put(Position(i,j,cost));
                 }
             }
-        }
-        for (Machine &machine: machines) {
-            int type = machine.type;
-            if (machine.is_core) {
-                machine.positions = CorePosition[type];
-            } else {
-                machine.positions = NonCorePosition[type];
-            }
+            machine.ResetPosition();
         }
     }
-
     void Solution::OutPut() {
         std::cout << num_machine << '\n';
         for (Machine &current_machine: machines) {
