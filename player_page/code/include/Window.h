@@ -17,6 +17,22 @@ namespace MiuiIsTheBest {
         bool operator<(const Window &p) const {
             return cost < p.cost;
         }
+
+        bool operator==(const Window &p) const {
+            return cost == p.cost;
+        }
+
+        bool operator>(const Window &p) const {
+            return cost > p.cost;
+        }
+
+        bool operator<=(const Window &p) const {
+            return cost <= p.cost;
+        }
+
+        bool operator>=(const Window &p) const {
+            return cost >= p.cost;
+        }
     };
 } // MiuiIsTheBest
 

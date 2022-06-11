@@ -9,6 +9,7 @@
 #include <stack>
 #include "queue"
 #include "Start.h"
+#include "list"
 #ifndef EMBEDDED_2022_SOLUTION_H
 #define EMBEDDED_2022_SOLUTION_H
 
@@ -23,7 +24,7 @@ namespace MiuiIsTheBest {
         std::vector<Machine> machines;//所有机器的集合
         std::vector<Start> starts;
         std::vector<int> machine_index;
-        std::vector<int> core_flow_lines;
+        std::list<int> core_line_machines;
         std::vector<Position> CorePosition[3];
         std::vector<Position> NonCorePosition[3];
         int num_flow_line = 0;
@@ -36,7 +37,7 @@ namespace MiuiIsTheBest {
         int num_regions = 0;
         int num_cycle_windows = 0;
         unsigned int total_cost[6];
-        void MachinePositionInit();
+
 
         bool IsSuccessor(Machine *current_machine, int parent_index);
 
@@ -50,6 +51,10 @@ namespace MiuiIsTheBest {
 
     public:
         bool GetSolution();
+
+        void MachinePositionInitWithoutSort();
+
+        bool TSortBfs();
 
         bool MachineGraphInit();
 
