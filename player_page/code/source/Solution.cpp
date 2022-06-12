@@ -176,9 +176,9 @@ namespace MiuiIsTheBest {
 
         int core_index;
         int num_line_edges;
-        for(int j = 0;j<num_cores;j++){
+        for (int j = 0; j < num_cores; j++) {
             int flow_times;
-            std::cin>>flow_times;
+            std::cin >> flow_times;
             K.emplace_back(flow_times);
             std::cin >> num_line_edges;
             num_core_flow_line.emplace_back(num_line_edges);
@@ -242,51 +242,75 @@ namespace MiuiIsTheBest {
         }
         return true;
     }
+
     void Solution::MachinePositionInitWithSkiplist() {
         int ave_times;
-        for(auto k:K){
-            ave_times+=k;
+        for (auto k: K) {
+            ave_times += k;
         }
-        ave_times/=K.size();
-        for(Machine& machine:machines){
-            for (int i = 0;i<num_windows;i++){
-                for(int j = factories[windows[i].factory].front();j<=factories[windows[i].factory].back();j++){
-                    int energy_type = region_energy_types[j];
-                    unsigned int cost = 0;
-                    bool valid = false;
-                    switch (machine.type) {
-                        case 0:
-                            if(energy_type==0||energy_type==1){
-                                valid = true;
-                            }
-                            break;
-                        case 1:
-                            if(energy_type==0||energy_type==2){
-                                valid = true;
-                            }
-                            break;
-                        case 2:
-                            if(energy_type==3||energy_type==4){
-                                valid = true;
-                            }
-                            break;
-                        default:
-                            exit(-1);
+        ave_times /= K.size();
+        for (int i = 0; i < num_windows; i++) {
+            for (int j = factories[windows[i].factory].front(); j <= factories[windows[i].factory].back(); j++) {
+                int energy_type = region_energy_types[j];
+                bool valid;
+                if (energy_type == 0 || energy_type == 1) {
+                    NonCorePosition[0].emplace_back(i, j, 0);
+                    if (windows[i].init_type[0]) {
+                        CorePosition[0].emplace_back(i, j, 0);
                     }
-                    if(!valid)continue;
-                    if(!machine.is_core){
-                        cost+=machine.cost[energy_type];
-                    }else if(windows[i].init_type[machine.type]){
-                        cost+=manu_time[energy_type]*(ave_times*max_cycle_times+windows[i].cost_coeff);
-                    }else{
-                        continue;
+                }
+                if (energy_type == 0 || energy_type == 2) {
+                    NonCorePosition[1].emplace_back(i, j, 0);
+                    if (windows[i].init_type[1]) {
+                        CorePosition[1].emplace_back(i, j, 0);
                     }
-                    machine.positions->Put(Position(i,j,cost));
+                }
+                if (energy_type == 3 || energy_type == 4) {
+                    NonCorePosition[2].emplace_back(i, j, 0);
+                    if (windows[i].init_type[2]) {
+                        CorePosition[2].emplace_back(i, j, 0);
+                    }
                 }
             }
-            machine.ResetPosition();
+        }
+        for (
+            Machine &machine
+                : machines) {
+            int type = machine.type;
+            if (machine.is_core) {
+                for (
+                    const auto &pos
+                        : CorePosition[type]) {
+                    Position temp_pos = pos;
+                    temp_pos.cost += machine.cost[region_energy_types[pos.region]];
+                    temp_pos.cost += manu_time[region_energy_types[pos.region]] *
+                                     (
+                                             ave_times * max_cycle_times
+                                             + windows[pos.window].cost_coeff);
+                    machine.positions->
+                            Put(temp_pos);
+                }
+            } else {
+                for (
+                    const auto &pos
+                        : NonCorePosition[type]) {
+                    Position temp_pos = pos;
+                    temp_pos.cost += machine.cost[region_energy_types[pos.region]];
+                    temp_pos.cost += manu_time[region_energy_types[pos.region]] *
+                                     (
+                                             ave_times * max_cycle_times
+                                             + windows[pos.window].cost_coeff);
+                    machine.positions->
+                            Put(temp_pos);
+                }
+            }
+            machine.
+
+                    ResetPosition();
+
         }
     }
+
     void Solution::OutPut() {
         std::cout << num_machine << '\n';
         for (Machine &current_machine: machines) {
@@ -294,8 +318,8 @@ namespace MiuiIsTheBest {
         }
         std::cout << '\n';
         std::cout << num_cores << '\n';
-        for(int i = 0;i<core_line_machines.size();i++){
-            std::cout<< num_core_flow_line[i]+1<<' ';
+        for (int i = 0; i < core_line_machines.size(); i++) {
+            std::cout << num_core_flow_line[i] + 1 << ' ';
             for (int index: core_line_machines[i]) {
                 std::cout << machines[index].CurrentWindow() << " ";
             }
@@ -311,4 +335,5 @@ namespace MiuiIsTheBest {
 //        std::cout << '\n';
 //#endif
     }
+
 } // MiuiIsTheBest

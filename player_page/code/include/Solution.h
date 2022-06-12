@@ -36,7 +36,8 @@ namespace MiuiIsTheBest {
         int num_windows = 0;
         int num_regions = 0;
         int num_cycle_windows = 0;
-
+        std::vector<Position> NonCorePosition[3];
+        std::vector<Position> CorePosition[3];
 
         bool IsSuccessor(Machine *current_machine, int parent_index);
 
