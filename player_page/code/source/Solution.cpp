@@ -33,15 +33,15 @@ namespace MiuiIsTheBest {
     }
 
     bool Solution::TSortBfs() {
-        for (Start &start: starts) {
-            if (!TSort(start.index, &machine_index)) {
-                return false;
-            }
-            start.depth = machine_index.size();
-            machine_index.clear();
-            Reset();
-        }
-        std::sort(starts.begin(), starts.end());
+//        for (Start &start: starts) {
+//            if (!TSort(start.index, &machine_index)) {
+//                return false;
+//            }
+//            start.depth = machine_index.size();
+//            machine_index.clear();
+//            Reset();
+//        }
+//        std::sort(starts.begin(), starts.end());
         for (Start start: starts) {
             if (!TSort(start.index, &machine_index)) {
                 return false;
@@ -129,7 +129,6 @@ namespace MiuiIsTheBest {
     }
 
     Solution::Solution() {
-        std::cin >> K;
         std::cin >> manu_time[0] >> manu_time[1] >> manu_time[2] >> manu_time[3] >> manu_time[4];
         std::cin >> num_factories;
         for (int i = 0; i < num_factories; ++i) {
@@ -173,23 +172,35 @@ namespace MiuiIsTheBest {
             std::cin >> temp_flow_line.type >> temp_flow_line.previous_machine >> temp_flow_line.current_machine;
             flow_lines.push_back(temp_flow_line);
         }
-        std::cin >> num_core_flow_line;
+        std::cin >> num_cores;
+
         int core_index;
-        for (int i = 0; i < num_core_flow_line; ++i) {
-            std::cin >> core_index;
-            int previous_machine = flow_lines[core_index].previous_machine;
-            int current_machine = flow_lines[core_index].current_machine;
-            machines[flow_lines[core_index].current_machine].is_core = true;
-            machines[flow_lines[core_index].previous_machine].is_core = true;
-            if (core_line_machines.empty()) {
-                core_line_machines.emplace_front(current_machine);
-                core_line_machines.emplace_front(previous_machine);
-            } else if (current_machine == core_line_machines.front()) {
-                core_line_machines.emplace_front(previous_machine);
-            } else {
-                core_line_machines.emplace_back(current_machine);
+        int num_line_edges;
+        for(int j = 0;j<num_cores;j++){
+            int flow_times;
+            std::cin>>flow_times;
+            K.emplace_back(flow_times);
+            std::cin >> num_line_edges;
+            num_core_flow_line.emplace_back(num_line_edges);
+            core_line_machines.emplace_back(std::list<int>());
+            for (int i = 0; i < num_core_flow_line.back(); ++i) {
+                std::cin >> core_index;
+                int previous_machine = flow_lines[core_index].previous_machine;
+                int current_machine = flow_lines[core_index].current_machine;
+                machines[flow_lines[core_index].current_machine].is_core = true;
+                machines[flow_lines[core_index].previous_machine].is_core = true;
+
+                if (core_line_machines[j].empty()) {
+                    core_line_machines[j].emplace_front(current_machine);
+                    core_line_machines[j].emplace_front(previous_machine);
+                } else if (current_machine == core_line_machines[j].front()) {
+                    core_line_machines[j].emplace_front(previous_machine);
+                } else {
+                    core_line_machines[j].emplace_back(current_machine);
+                }
             }
         }
+
     }
 
     bool Solution::TSort(int index_machine, std::vector<int> *S) {
@@ -232,6 +243,11 @@ namespace MiuiIsTheBest {
         return true;
     }
     void Solution::MachinePositionInitWithSkiplist() {
+        int ave_times;
+        for(auto k:K){
+            ave_times+=k;
+        }
+        ave_times/=K.size();
         for(Machine& machine:machines){
             for (int i = 0;i<num_windows;i++){
                 for(int j = factories[windows[i].factory].front();j<=factories[windows[i].factory].back();j++){
@@ -261,7 +277,7 @@ namespace MiuiIsTheBest {
                     if(!machine.is_core){
                         cost+=machine.cost[energy_type];
                     }else if(windows[i].init_type[machine.type]){
-                        cost+=manu_time[energy_type]*(K*max_cycle_times+windows[i].cost_coeff);
+                        cost+=manu_time[energy_type]*(ave_times*max_cycle_times+windows[i].cost_coeff);
                     }else{
                         continue;
                     }
@@ -277,10 +293,15 @@ namespace MiuiIsTheBest {
             std::cout << current_machine.CurrentRegion() << ' ';
         }
         std::cout << '\n';
-        std::cout << num_core_flow_line + 1 << '\n';
-        for (int index: core_line_machines) {
-            std::cout << machines[index].CurrentWindow() << " ";
+        std::cout << num_cores << '\n';
+        for(int i = 0;i<core_line_machines.size();i++){
+            std::cout<< num_core_flow_line[i]+1<<' ';
+            for (int index: core_line_machines[i]) {
+                std::cout << machines[index].CurrentWindow() << " ";
+            }
+            std::cout << '\n';
         }
+
 
 //#ifdef FULL_OUTPUT
 //        std::cout<<std::endl;
