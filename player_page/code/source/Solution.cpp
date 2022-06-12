@@ -33,15 +33,15 @@ namespace MiuiIsTheBest {
     }
 
     bool Solution::TSortBfs() {
-        for (Start &start: starts) {
-            if (!TSort(start.index, &machine_index)) {
-                return false;
-            }
-            start.depth = machine_index.size();
-            machine_index.clear();
-            Reset();
-        }
-        std::sort(starts.begin(), starts.end());
+//        for (Start &start: starts) {
+//            if (!TSort(start.index, &machine_index)) {
+//                return false;
+//            }
+//            start.depth = machine_index.size();
+//            machine_index.clear();
+//            Reset();
+//        }
+//        std::sort(starts.begin(), starts.end());
         for (Start start: starts) {
             if (!TSort(start.index, &machine_index)) {
                 return false;
