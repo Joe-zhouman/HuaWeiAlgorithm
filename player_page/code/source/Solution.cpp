@@ -285,8 +285,13 @@ namespace MiuiIsTheBest {
                     Position temp_pos = pos;
                     temp_pos.cost += machine.cost[region_energy_types[pos.region]];
                     temp_pos.cost += manu_time[region_energy_types[pos.region]] * (windows[pos.window].cost);
-                    machine.positions->
-                            Put(temp_pos);
+                    if(machine.positions->empty()){
+                        machine.positions->emplace_back(temp_pos);
+                    }else if(machine.positions->front()>temp_pos){
+                        machine.positions->emplace_front(temp_pos);
+                    }else{
+                        machine.positions->emplace_back(temp_pos);
+                    }
                 }
             } else {
                 for (
@@ -294,17 +299,18 @@ namespace MiuiIsTheBest {
                         : NonCorePosition[type]) {
                     Position temp_pos = pos;
                     temp_pos.cost += machine.cost[region_energy_types[pos.region]];
-                    machine.positions->
-                            Put(temp_pos);
+                    if(machine.positions->empty()){
+                        machine.positions->emplace_back(temp_pos);
+                    }else if(machine.positions->front()>temp_pos){
+                        machine.positions->emplace_front(temp_pos);
+                    }else{
+                        machine.positions->emplace_back(temp_pos);
+                    }
                 }
             }
-            machine.
-
-                    ResetPosition();
-
+            machine.ResetPosition();
         }
     }
-
     void Solution::OutPut() {
         std::cout << num_machine << '\n';
         for (Machine &current_machine: machines) {

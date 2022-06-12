@@ -10,16 +10,19 @@
 #include "Position.h"
 #include "Window.h"
 #include "Start.h"
-#include "Skiplist.h"
+#include "deque"
+//#include "Skiplist.h"
 
 namespace MiuiIsTheBest {
 
     class Machine {
     public:
-        simple_dsa::QlistNodePosi<Position> current_position;//当前所在的许用位置
+        int current_position;
+        //simple_dsa::QlistNodePosi<Position> current_position;//当前所在的许用位置
         int depth = 0;
         unsigned int cost[5];//使用不同能源的费用
-        simple_dsa::Skiplist<Position>* positions;//所有的容许位置
+        std::deque<Position> *positions;
+        //simple_dsa::Skiplist<Position>* positions;//所有的容许位置
         std::vector<int> *parents;//父节点
         std::vector<Start> *children;//子节点
         std::vector<bool> *connect_types;//同父节点的连接状态
@@ -38,20 +41,19 @@ namespace MiuiIsTheBest {
             }
         }
 
-        int CurrentWindow() { return current_position->entry_.window; }
+        int CurrentWindow() { return positions->at(current_position).window; }
 
-        int CurrentRegion() { return current_position->entry_.region; }
+        int CurrentRegion() { return positions->at(current_position).region; }
 
-        bool OutOfPosition() { return current_position== nullptr||current_position==positions->Last()->data_->Last()->succ_;}//是否超出所在位置
+        bool OutOfPosition() { return current_position >=positions->size();}//是否超出所在位置
         void NextPosition(){
-            if(current_position == nullptr) return;
-            current_position=current_position->succ_;
+            current_position++;
         }
         void ResetPosition(){
-            current_position=positions->Last()->data_->First();
+            current_position=0;
         }
         ~Machine() {
-            delete current_position;
+            //delete current_position;
             delete positions;
             delete parents;
             delete children;
@@ -64,11 +66,13 @@ namespace MiuiIsTheBest {
             status = m.status;
             type = m.type;
             is_core = m.is_core;
+            current_position = m.current_position;
             for (int i = 0; i < 5; ++i) {
                 cost[i] = m.cost[i];
             }
-            positions = new simple_dsa::Skiplist<Position>;
-            current_position=new simple_dsa::QuadlistNode<Position>;
+            //positions = new simple_dsa::Skiplist<Position>;
+            //current_position=new simple_dsa::QuadlistNode<Position>;
+            positions = new std::deque<Position>;
             parents = new std::vector<int>;
             children = new std::vector<Start>;
             connect_types = new std::vector<bool>;
@@ -77,12 +81,13 @@ namespace MiuiIsTheBest {
 
         explicit Machine(int machine_type_number)
                 : type(machine_type_number) {
+            positions = new std::deque<Position>;
             parents = new std::vector<int>;
             children = new std::vector<Start>;
             connect_types = new std::vector<bool>;
             cycled_windows = new std::vector<int>;
-            current_position=new simple_dsa::QuadlistNode<Position>;
-            positions = new simple_dsa::Skiplist<Position>;
+            //current_position=new simple_dsa::QuadlistNode<Position>;
+            //positions = new simple_dsa::Skiplist<Position>;
             for (unsigned int &i: cost) {
                 i = 0;
             }
