@@ -9,12 +9,14 @@
 #include <stack>
 #include "queue"
 #include "Start.h"
+#include "list"
 #ifndef EMBEDDED_2022_SOLUTION_H
 #define EMBEDDED_2022_SOLUTION_H
 
 namespace MiuiIsTheBest {
     class Solution {
-        int K;//生产次数
+        std::vector<int> K;//生产次数
+        int num_Cores;
         int manu_time[5];//能源加工时间
         std::vector<Window> windows;//所有窗口的集合
         std::vector<std::vector<int>> factories;//所有工厂的集合
@@ -26,8 +28,9 @@ namespace MiuiIsTheBest {
         std::vector<int> core_flow_lines;
         std::vector<Position> CorePosition[3];
         std::vector<Position> NonCorePosition[3];
+        std::vector<std::list<int>> core_line_machines;
         int num_flow_line = 0;
-        int num_core_flow_line = 0;//流水线核心产线边数
+        std::vector<int> num_core_flow_line;//流水线核心产线边数
         //其他变量
         int index_current_step = 0;
         int num_machine = 0;
