@@ -33,15 +33,15 @@ namespace MiuiIsTheBest {
     }
 
     bool Solution::TSortBfs() {
-//        for (Start &start: starts) {
-//            if (!TSort(start.index, &machine_index)) {
-//                return false;
-//            }
-//            start.depth = machine_index.size();
-//            machine_index.clear();
-//            Reset();
-//        }
-//        std::sort(starts.begin(), starts.end());
+        for (Start &start: starts) {
+            if (!TSort(start.index, &machine_index)) {
+                return false;
+            }
+            start.depth = machine_index.size();
+            machine_index.clear();
+            Reset();
+        }
+        std::sort(starts.begin(), starts.end());
         for (Start start: starts) {
             if (!TSort(start.index, &machine_index)) {
                 return false;
@@ -250,6 +250,7 @@ namespace MiuiIsTheBest {
         }
         ave_times /= K.size();
         for (int i = 0; i < num_windows; i++) {
+            windows[i].cost+=ave_times * max_cycle_times+ windows[i].cost_coeff;
             for (int j = factories[windows[i].factory].front(); j <= factories[windows[i].factory].back(); j++) {
                 int energy_type = region_energy_types[j];
                 bool valid;
@@ -283,10 +284,7 @@ namespace MiuiIsTheBest {
                         : CorePosition[type]) {
                     Position temp_pos = pos;
                     temp_pos.cost += machine.cost[region_energy_types[pos.region]];
-                    temp_pos.cost += manu_time[region_energy_types[pos.region]] *
-                                     (
-                                             ave_times * max_cycle_times
-                                             + windows[pos.window].cost_coeff);
+                    temp_pos.cost += manu_time[region_energy_types[pos.region]] * (windows[pos.window].cost);
                     machine.positions->
                             Put(temp_pos);
                 }
@@ -296,10 +294,6 @@ namespace MiuiIsTheBest {
                         : NonCorePosition[type]) {
                     Position temp_pos = pos;
                     temp_pos.cost += machine.cost[region_energy_types[pos.region]];
-                    temp_pos.cost += manu_time[region_energy_types[pos.region]] *
-                                     (
-                                             ave_times * max_cycle_times
-                                             + windows[pos.window].cost_coeff);
                     machine.positions->
                             Put(temp_pos);
                 }
