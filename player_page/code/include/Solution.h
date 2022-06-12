@@ -38,8 +38,10 @@ namespace MiuiIsTheBest {
         int num_windows = 0;
         int num_regions = 0;
         int num_cycle_windows = 0;
+        int max_cycle_times;
+        int num_cores;
 
-        void MachinePositionInit();
+
 
         bool IsSuccessor(Machine *current_machine, int parent_index);
 
@@ -52,6 +54,7 @@ namespace MiuiIsTheBest {
         }
 
     public:
+        void MachinePositionInit();
         bool GetSolution();
 
         bool MachineGraphInit();
